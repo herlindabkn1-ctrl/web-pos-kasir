@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Dasbor Analisis | Sembako Jaya{% endblock %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <div class="eyebrow">Ringkasan usaha</div>
+      <h1>Dashboard Analisis</h1>
+      <p class="muted">Pantau keuangan, persediaan, dan perputaran produk toko.</p>
+    </div>
+    <a class="button" href="{{ url_for('kasir') }}">Mulai transaksi</a>
+  </section>
+
+  <section class="financial-grid" aria-label="Ringkasan keuangan">
+    <article class="financial-card sales-card">
+      <h2>Total Penjualan Usaha (Omzet)</h2>
+      <p>{{ total_omset|rupiah }}</p>
+    </article>
+    <article class="financial-card profit-card">
+      <h2>Keuntungan Bersih Riil</h2>
+      <p>{{ total_laba|rupiah }}</p>
+    </article>
+  </section>
+
+  <section class="alerts-grid" aria-label="Peringatan inventori">
+    <article class="inventory-alert critical-alert">
+      <h2>⚠️ Kebutuhan Pokok Hampir Habis</h2>
+      {% if stok_kritis %}
+        <ul>
+          {% for p in stok_kritis %}
+            <li><strong>{{ p.nama }}</strong> — Sisa di rak: <strong>{{ p.stok }}</strong> pcs (batas minimal: {{ p.min_stok }})</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="alert-empty">Semua pasokan barang laris aman.</p>
+      {% endif %}
+    </article>
+
+    <article class="inventory-alert slow-alert">
+      <h2>📦 Evaluasi Stok Lambat</h2>
+      {% if dead_stock %}
+        <ul>
+          {% for p in dead_stock %}
+            <li><strong>{{ p.nama }}</strong> — Stok tersisa: {{ p.stok }} pcs (terjual {{ p.terjual }} pcs)</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="alert-empty">Tidak ada modal menumpuk pada barang lambat.</p>
+      {% endif %}
+    </article>
+  </section>
+
+  <section class="panel inventory-panel">
+    <div class="section-heading compact">
+      <div>
+        <div class="eyebrow">Persediaan</div>
+        <h2>Informasi Inventori Toko</h2>
+      </div>
+      <span class="muted">{{ barang|length }} produk</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama produk</th>
+            <th class="text-center">Sisa stok</th>
+            <th class="text-right">Harga beli</th>
+            <th class="text-right">Harga jual</th>
+            <th class="text-center">Kategori</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in barang %}
+            <tr>
+              <td class="product-code">{{ p.kode }}</td>
+              <td><strong>{{ p.nama }}</strong></td>
+              <td class="text-center">
+                <span class="badge {{ 'warning' if p.stok <= p.min_stok else 'normal' }}">{{ p.stok }} pcs</span>
+              </td>
+              <td class="text-right muted">{{ p.harga_beli|rupiah }}</td>
+              <td class="text-right price-cell">{{ p.harga_jual|rupiah }}</td>
+              <td class="text-center">
+                <span class="badge {{ 'normal' if p.kategori == 'Sembako' else 'kitchen-badge' if p.kategori == 'Kebutuhan Dapur' else 'spice-badge' if p.kategori == 'Bumbu Dapur' else 'food-badge' }}">{{ p.kategori }}</span>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="muted">Belum ada produk di inventori.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel transaction-panel">
+    <div class="eyebrow">Riwayat</div>
+    <h2>Transaksi terbaru</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>No. nota</th><th>Tanggal</th><th>Total</th><th>Laba</th></tr></thead>
+        <tbody>
+          {% for trx in transaksi %}
+            <tr>
+              <td><strong>{{ trx.nota }}</strong></td>
+              <td>{{ trx.tanggal }}</td>
+              <td>{{ trx.total|rupiah }}</td>
+              <td>{{ trx.laba|rupiah }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="muted">Belum ada transaksi penjualan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

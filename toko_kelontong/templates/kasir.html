@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Kasir Pembayaran | Sembako Jaya{% endblock %}
+
+{% block content %}
+  <section class="section-heading">
+    <div>
+      <div class="eyebrow">Transaksi baru</div>
+      <h1>Kasir Pembayaran</h1>
+      <p class="muted">Pilih barang dari etalase, masukkan pembayaran, lalu cetak struk.</p>
+    </div>
+    <a class="button secondary" href="{{ url_for('index') }}">Kembali ke dasbor</a>
+  </section>
+
+  <div class="cashier-layout">
+    <section class="panel" aria-labelledby="catalog-title">
+      <div class="section-heading compact">
+        <div>
+          <div class="eyebrow">Katalog</div>
+          <h2 id="catalog-title">Daftar Etalase Barang</h2>
+        </div>
+      </div>
+      <div class="catalog-grid">
+        {% for p in barang %}
+          <button class="catalog-item" type="button" data-id="{{ p.kode }}"
+                  data-name="{{ p.nama }}" data-price="{{ p.harga_jual }}"
+                  data-stock="{{ p.stok }}" {% if p.stok <= 0 %}disabled{% endif %}>
+            <span class="catalog-copy">
+              <strong>{{ p.nama }}</strong>
+              <span class="catalog-price">{{ p.harga_jual|rupiah }}</span>
+            </span>
+            <span class="stock-label">Stok: <span class="stock-count">{{ p.stok }}</span></span>
+          </button>
+        {% else %}
+          <p class="muted">Belum ada produk untuk dijual.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="panel" aria-labelledby="payment-title">
+      <h2 id="payment-title">Kasir Pembayaran</h2>
+      <div id="cart-empty" class="empty muted">Belum ada barang belanjaan.</div>
+      <div id="cart-items" aria-live="polite"></div>
+      <div class="cart-total payment-total">
+        <span>Total tagihan</span>
+        <span id="cart-total">Rp0</span>
+      </div>
+      <label class="field-label" for="payment">Diterima dari pembeli</label>
+      <input class="text-input" id="payment" type="number" min="0" step="1"
+             inputmode="numeric" placeholder="Masukkan nominal pembayaran">
+      <div class="change-line">
+        <span>Kembalian kasir</span>
+        <strong id="change-amount">Rp0</strong>
+      </div>
+      <button class="button full-width checkout-button" id="checkout" type="button" disabled>
+        💾 Simpan Transaksi &amp; Cetak
+      </button>
+      <p id="checkout-message" class="checkout-message" role="status" aria-live="polite"></p>
+    </aside>
+  </div>
+
+  <section id="area-struk" class="receipt receipt-thermal" hidden aria-label="Struk transaksi">
+    <div class="receipt-store">🏪 TOKO SEMBAKO JAYA</div>
+    <div class="receipt-meta">
+      Nota: <span id="receipt-note"></span><br>
+      <span id="receipt-date"></span>
+    </div>
+    <div id="receipt-items" class="receipt-items"></div>
+    <div class="receipt-line"><strong>TOTAL:</strong><strong id="receipt-total"></strong></div>
+    <div class="receipt-line"><span>BAYAR:</span><span id="receipt-paid"></span></div>
+    <div class="receipt-line"><strong>KEMBALIAN:</strong><strong id="receipt-change"></strong></div>
+    <div class="receipt-thanks">--- Terima kasih ---</div>
+    <button class="button secondary print-button no-print" id="print-receipt" type="button">Cetak ulang struk</button>
+  </section>
+
+  <script>
+    const cart = new Map();
+    const formatRupiah = value => new Intl.NumberFormat("id-ID", {
+      style: "currency", currency: "IDR", maximumFractionDigits: 0
+    }).format(value);
+    const paymentInput = document.getElementById("payment");
+    const checkoutButton = document.getElementById("checkout");
+    const checkoutMessage = document.getElementById("checkout-message");
+
+    function cartTotal() {
+      return Array.from(cart.values())
+        .reduce((sum, item) => sum + item.price * item.qty, 0);
+    }
+
+    function updatePaymentSummary() {
+      const total = cartTotal();
+      const payment = Number(paymentInput.value);
+      const change = payment - total;
+      document.getElementById("cart-total").textContent = formatRupiah(total);
+      const changeElement = document.getElementById("change-amount");
+      if (cart.size === 0) {
+        changeElement.textContent = formatRupiah(0);
+        changeElement.className = "";
+      } else if (Number.isFinite(payment) && payment >= total) {
+        changeElement.textContent = formatRupiah(change);
+        changeElement.className = "change-positive";
+      } else {
+        changeElement.textContent = "Uang kurang";
+        changeElement.className = "change-negative";
+      }
+      checkoutButton.disabled = cart.size === 0;
+    }
+
+    function renderCart() {
+      const container = document.getElementById("cart-items");
+      const emptyMessage = document.getElementById("cart-empty");
+      const entries = Array.from(cart.values());
+      emptyMessage.hidden = entries.length > 0;
+
+      container.replaceChildren(...entries.map(item => {
+        const row = document.createElement("div");
+        row.className = "cart-item";
+        const title = document.createElement("strong");
+        title.textContent = `${item.name} × ${item.qty}`;
+        const subtotal = document.createElement("strong");
+        subtotal.textContent = formatRupiah(item.price * item.qty);
+        const controls = document.createElement("div");
+        controls.className = "quantity-controls";
+
+        const decrease = document.createElement("button");
+        decrease.className = "button secondary";
+        decrease.type = "button";
+        decrease.textContent = "−";
+        decrease.setAttribute("aria-label", `Kurangi ${item.name}`);
+        decrease.addEventListener("click", () => {
+          if (item.qty === 1) cart.delete(item.id);
+          else item.qty -= 1;
+          renderCart();
+        });
+
+        const quantity = document.createElement("span");
+        quantity.textContent = item.qty;
+
+        const increase = document.createElement("button");
+        increase.className = "button secondary";
+        increase.type = "button";
+        increase.textContent = "+";
+        increase.setAttribute("aria-label", `Tambah ${item.name}`);
+        increase.disabled = item.qty >= item.stock;
+        increase.addEventListener("click", () => {
+          if (item.qty < item.stock) item.qty += 1;
+          renderCart();
+        });
+
+        controls.append(decrease, quantity, increase);
+        row.append(title, subtotal, controls);
+        return row;
+      }));
+      updatePaymentSummary();
+    }
+
+    document.querySelectorAll(".catalog-item").forEach(button => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.id;
+        const item = cart.get(id) || {
+          id,
+          name: button.dataset.name,
+          price: Number(button.dataset.price),
+          stock: Number(button.dataset.stock),
+          qty: 0
+        };
+        if (item.qty < item.stock) item.qty += 1;
+        cart.set(id, item);
+        checkoutMessage.textContent = "";
+        renderCart();
+      });
+    });
+
+    paymentInput.addEventListener("input", updatePaymentSummary);
+    document.getElementById("print-receipt").addEventListener("click", () => window.print());
+
+    checkoutButton.addEventListener("click", async () => {
+      const payment = Number(paymentInput.value);
+      if (cart.size === 0) {
+        checkoutMessage.textContent = "Keranjang belanja kosong.";
+        checkoutMessage.className = "checkout-message error-text";
+        return;
+      }
+      if (!Number.isSafeInteger(payment) || payment <= 0) {
+        checkoutMessage.textContent = "Masukkan jumlah pembayaran yang valid.";
+        checkoutMessage.className = "checkout-message error-text";
+        paymentInput.focus();
+        return;
+      }
+      if (payment < cartTotal()) {
+        checkoutMessage.textContent = "Uang pembayaran kurang.";
+        checkoutMessage.className = "checkout-message error-text";
+        paymentInput.focus();
+        return;
+      }
+
+      checkoutButton.disabled = true;
+      checkoutMessage.textContent = "Menyimpan transaksi...";
+      checkoutMessage.className = "checkout-message";
+      try {
+        const response = await fetch("{{ url_for('kasir') }}", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            keranjang: Array.from(cart.values(), item => ({ id: item.id, qty: item.qty })),
+            bayar: payment
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || result.status !== "success") {
+          checkoutMessage.textContent = result.message || "Transaksi gagal diproses.";
+          checkoutMessage.className = "checkout-message error-text";
+          return;
+        }
+
+        result.items.forEach(sold => {
+          const productButton = Array.from(document.querySelectorAll(".catalog-item"))
+            .find(candidate => candidate.dataset.id === sold.id);
+          if (!productButton) return;
+          productButton.dataset.stock = String(sold.stok);
+          productButton.disabled = sold.stok <= 0;
+          productButton.querySelector(".stock-count").textContent = sold.stok;
+        });
+
+        document.getElementById("receipt-note").textContent = result.nota;
+        document.getElementById("receipt-date").textContent = result.tanggal;
+        document.getElementById("receipt-total").textContent = formatRupiah(result.total);
+        document.getElementById("receipt-paid").textContent = formatRupiah(payment);
+        document.getElementById("receipt-change").textContent = formatRupiah(result.kembalian);
+        const receiptItems = document.getElementById("receipt-items");
+        receiptItems.replaceChildren(...result.items.map(item => {
+          const row = document.createElement("div");
+          row.className = "receipt-line";
+          const description = document.createElement("span");
+          description.textContent = `${item.nama} ×${item.qty}`;
+          const subtotal = document.createElement("span");
+          subtotal.textContent = formatRupiah(item.subtotal);
+          row.append(description, subtotal);
+          return row;
+        }));
+
+        cart.clear();
+        paymentInput.value = "";
+        renderCart();
+        document.getElementById("area-struk").hidden = false;
+        checkoutMessage.textContent = `Transaksi ${result.nota} berhasil disimpan.`;
+        checkoutMessage.className = "checkout-message success-text";
+        window.print();
+      } catch {
+        checkoutMessage.textContent = "Tidak dapat menghubungi server. Silakan coba kembali.";
+        checkoutMessage.className = "checkout-message error-text";
+      } finally {
+        checkoutButton.disabled = cart.size === 0;
+      }
+    });
+  </script>
+{% endblock %}
