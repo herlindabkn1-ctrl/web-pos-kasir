@@ -83,6 +83,11 @@ def json_error(message, status=400):
 
 @app.get("/")
 def index():
+    return render_template("login.html")
+
+
+@app.get("/dashboard")
+def dashboard():
     conn = get_db_connection()
     try:
         produk_list = conn.execute("SELECT * FROM produk ORDER BY nama").fetchall()
