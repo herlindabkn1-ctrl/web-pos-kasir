@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f8fafc">
+  <title>Masuk ke Evora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      --color-brand-50: #eef2ff;
+      --color-brand-100: #e0e7ff;
+      --color-brand-500: #6366f1;
+      --color-brand-600: #4f46e5;
+      --color-brand-700: #4338ca;
+    }
+
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">
+  <div class="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
+    <div class="absolute -left-40 -top-40 size-[520px] rounded-full bg-indigo-100/70 blur-3xl"></div>
+    <div class="absolute -bottom-48 -right-40 size-[560px] rounded-full bg-violet-100/60 blur-3xl"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,.92)_0%,rgba(248,250,252,.5)_55%,rgba(248,250,252,0)_100%)]"></div>
+  </div>
+
+  <a href="/" class="absolute left-5 top-5 z-10 inline-flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-slate-500 transition hover:text-brand-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 sm:left-8 sm:top-8">
+    <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M16 10H4m6 6-6-6 6-6"/></svg>
+    <span class="hidden sm:inline">Kembali ke Beranda</span>
+  </a>
+
+  <main class="relative mx-auto flex min-h-screen max-w-7xl items-center justify-center px-5 py-20 sm:px-8">
+    <div class="w-full max-w-[440px]">
+      <a href="/" class="mx-auto mb-7 flex w-fit items-center gap-2.5" aria-label="Evora beranda">
+        <span class="grid size-10 place-items-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-lg shadow-indigo-600/20">E</span>
+        <span class="text-xl font-bold tracking-[-.7px] text-slate-950">Evora</span>
+      </a>
+
+      <section class="rounded-2xl border border-white/90 bg-white/90 p-6 shadow-[0_25px_80px_-30px_rgba(49,46,129,.22)] backdrop-blur-xl sm:p-9" aria-labelledby="login-heading">
+        <div class="mb-7">
+          <p id="login-kicker" class="mb-2 text-xs font-semibold uppercase tracking-[.14em] text-brand-600">Selamat datang</p>
+          <h1 id="login-heading" class="text-[26px] font-bold tracking-[-.045em] text-slate-950 sm:text-[30px]">Selamat Datang Kembali</h1>
+          <p id="login-intro" class="mt-2 text-sm text-slate-500">Masuk ke akun Evora Anda</p>
+        </div>
+
+        <form id="login-form" class="space-y-5" hidden>
+          <div>
+            <label for="login-username" class="mb-2 block text-[13px] font-semibold text-slate-700">Username</label>
+            <div class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3.5 transition focus-within:border-brand-600 focus-within:ring-4 focus-within:ring-indigo-600/10">
+              <svg viewBox="0 0 20 20" class="size-[18px] shrink-0 text-slate-400 transition group-focus-within:text-brand-600" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="6.5" r="3.2"/><path d="M3.5 17a6.5 6.5 0 0 1 13 0"/></svg>
+              <input id="login-username" name="username" type="text" autocomplete="username" minlength="3" maxlength="32" placeholder="Username akun Anda" required class="h-12 w-full min-w-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400">
+            </div>
+          </div>
+          <div>
+            <label for="login-password" class="mb-2 block text-[13px] font-semibold text-slate-700">Password</label>
+            <div class="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3.5 transition focus-within:border-brand-600 focus-within:ring-4 focus-within:ring-indigo-600/10">
+              <svg viewBox="0 0 20 20" class="size-[18px] shrink-0 text-slate-400 transition group-focus-within:text-brand-600" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3.5" y="8" width="13" height="9" rx="2"/><path d="M6.5 8V5.8a3.5 3.5 0 1 1 7 0V8"/><path d="M10 11.5v2"/></svg>
+              <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Masukkan password Anda" required class="h-12 w-full min-w-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400">
+              <button id="toggle-password" type="button" class="shrink-0 rounded-md p-1 text-slate-400 transition hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-200" aria-label="Tampilkan password" aria-pressed="false">
+                <svg viewBox="0 0 20 20" class="size-[18px]" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2.5 10s2.7-5 7.5-5 7.5 5 7.5 5-2.7 5-7.5 5-7.5-5-7.5-5Z"/><circle cx="10" cy="10" r="2"/></svg>
+              </button>
+            </div>
+          </div>
+          <p id="login-error" class="rounded-lg bg-rose-50 px-3 py-2.5 text-xs leading-5 text-rose-700" role="alert" hidden></p>
+          <button id="login-submit" type="submit" class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-wait disabled:opacity-60">
+            Masuk ke Aplikasi
+            <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10h12M10 4l6 6-6 6"/></svg>
+          </button>
+        </form>
+
+        <form id="setup-form" class="space-y-4" hidden>
+          <div>
+            <label for="setup-name" class="mb-2 block text-[13px] font-semibold text-slate-700">Nama akun</label>
+            <input id="setup-name" name="nama" type="text" autocomplete="name" maxlength="80" placeholder="Nama Anda" required class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-indigo-600/10">
+          </div>
+          <div>
+            <label for="setup-username" class="mb-2 block text-[13px] font-semibold text-slate-700">Username</label>
+            <input id="setup-username" name="username" type="text" autocomplete="username" minlength="3" maxlength="32" pattern="[A-Za-z0-9._\-]{3,32}" placeholder="Pilih username" required class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-indigo-600/10">
+          </div>
+          <div>
+            <label for="setup-password" class="mb-2 block text-[13px] font-semibold text-slate-700">Password</label>
+            <input id="setup-password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Minimal 8 karakter" required class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-indigo-600/10">
+          </div>
+          <div>
+            <label for="setup-confirm" class="mb-2 block text-[13px] font-semibold text-slate-700">Ulangi password</label>
+            <input id="setup-confirm" name="password-confirm" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Ulangi password Anda" required class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-brand-600 focus:ring-4 focus:ring-indigo-600/10">
+          </div>
+          <p id="setup-error" class="rounded-lg bg-rose-50 px-3 py-2.5 text-xs leading-5 text-rose-700" role="alert" hidden></p>
+          <button id="setup-submit" type="submit" class="inline-flex h-12 w-full items-center justify-center rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-wait disabled:opacity-60">Buat Akun dan Masuk</button>
+        </form>
+
+        <p id="connection-error" class="mt-5 rounded-lg bg-rose-50 px-3 py-2.5 text-xs leading-5 text-rose-700" role="alert" hidden></p>
+        <div class="my-6 flex items-center gap-3"><span class="h-px flex-1 bg-slate-100"></span><span class="text-[10px] font-medium text-slate-400">EVORA WORKSPACE</span><span class="h-px flex-1 bg-slate-100"></span></div>
+        <p class="text-center text-[11px] leading-5 text-slate-400">Akun dan data toko Anda tersimpan dengan aman.</p>
+      </section>
+
+      <p class="mt-6 text-center text-xs text-slate-400"><a href="/" class="font-semibold text-brand-600 transition hover:text-brand-700">← Kembali ke Beranda</a></p>
+    </div>
+  </main>
+
+  <script>
+    const loginForm = document.getElementById("login-form");
+    const setupForm = document.getElementById("setup-form");
+    const loginError = document.getElementById("login-error");
+    const setupError = document.getElementById("setup-error");
+    const connectionError = document.getElementById("connection-error");
+
+    async function sendAuth(url, payload) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || `Permintaan gagal (${response.status})`);
+      return result;
+    }
+
+    function showError(element, message) {
+      element.textContent = message;
+      element.hidden = false;
+    }
+
+    async function checkSession() {
+      try {
+        const response = await fetch("/api/auth/status", { cache: "no-store" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || `Gagal memeriksa status akun (${response.status})`);
+        if (result.authenticated) {
+          window.location.replace("/index.html");
+          return;
+        }
+
+        loginForm.hidden = result.perluSetup;
+        setupForm.hidden = !result.perluSetup;
+        document.getElementById("login-kicker").textContent = result.perluSetup ? "MULAI DENGAN EVORA" : "SELAMAT DATANG";
+        document.getElementById("login-heading").textContent = result.perluSetup ? "Buat Akun Evora" : "Selamat Datang Kembali";
+        document.getElementById("login-intro").textContent = result.perluSetup
+          ? "Buat akun kasir pertama untuk mulai mengelola toko."
+          : "Masuk ke akun Evora Anda";
+        document.getElementById(result.perluSetup ? "setup-name" : "login-username").focus({ preventScroll: true });
+      } catch (error) {
+        showError(connectionError, `Tidak dapat terhubung ke server login: ${error.message}`);
+      }
+    }
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      loginError.hidden = true;
+      const button = document.getElementById("login-submit");
+      button.disabled = true;
+      try {
+        await sendAuth("/api/auth/login", {
+          username: loginForm.elements.username.value,
+          password: loginForm.elements.password.value
+        });
+        window.location.replace("/index.html");
+      } catch (error) {
+        showError(loginError, error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    setupForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setupError.hidden = true;
+      const password = setupForm.elements.password.value;
+      if (password !== setupForm.elements["password-confirm"].value) {
+        showError(setupError, "Konfirmasi password tidak sama.");
+        return;
+      }
+      const button = document.getElementById("setup-submit");
+      button.disabled = true;
+      try {
+        await sendAuth("/api/auth/setup", {
+          nama: setupForm.elements.nama.value,
+          username: setupForm.elements.username.value,
+          password
+        });
+        window.location.replace("/index.html");
+      } catch (error) {
+        showError(setupError, error.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById("toggle-password").addEventListener("click", (event) => {
+      const input = document.getElementById("login-password");
+      const button = event.currentTarget;
+      const visible = input.type === "text";
+      input.type = visible ? "password" : "text";
+      button.setAttribute("aria-pressed", String(!visible));
+      button.setAttribute("aria-label", visible ? "Tampilkan password" : "Sembunyikan password");
+    });
+
+    checkSession();
+  </script>
+</body>
+</html>

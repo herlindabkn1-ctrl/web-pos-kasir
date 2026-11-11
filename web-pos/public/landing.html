@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Evora menyatukan kasir, inventaris, dan laporan bisnis dalam satu sistem yang sederhana.">
+  <title>Evora — Satu Sistem. Kendali Penuh.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      --color-brand-50: #eef2ff;
+      --color-brand-100: #e0e7ff;
+      --color-brand-500: #6366f1;
+      --color-brand-600: #4f46e5;
+      --color-brand-700: #4338ca;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body class="bg-white font-sans text-slate-800 antialiased">
+  <nav class="sticky top-0 z-30 border-b border-slate-100/80 bg-white/85 backdrop-blur-xl" aria-label="Navigasi utama">
+    <div class="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
+      <a href="/" class="flex items-center gap-2.5" aria-label="Evora beranda">
+        <span class="grid size-9 place-items-center rounded-xl bg-brand-600 text-sm font-bold text-white shadow-md shadow-indigo-600/20">E</span>
+        <span class="text-xl font-bold tracking-[-.7px] text-slate-950">Evora</span>
+      </a>
+      <div class="hidden items-center gap-9 text-sm font-medium text-slate-500 md:flex">
+        <a href="#fitur" class="transition-colors hover:text-brand-600">Fitur</a>
+        <a href="#harga" class="transition-colors hover:text-brand-600">Harga</a>
+        <a href="#bantuan" class="transition-colors hover:text-brand-600">Bantuan</a>
+      </div>
+      <a href="/login.html" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 transition hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-indigo-100">
+        Masuk
+        <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10h12M10 4l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="relative isolate overflow-hidden" aria-labelledby="hero-title">
+      <div class="pointer-events-none absolute -right-36 -top-40 -z-10 size-[520px] rounded-full bg-indigo-50 blur-3xl" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -bottom-48 left-[-10rem] -z-10 size-[460px] rounded-full bg-sky-50/80 blur-3xl" aria-hidden="true"></div>
+      <div class="mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl grid-cols-1 items-center gap-14 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:py-24">
+        <div class="mx-auto max-w-[610px] text-center lg:mx-0 lg:text-left">
+          <p class="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/85 px-3.5 py-2 text-[11px] font-semibold tracking-wide text-brand-700 shadow-sm">
+            <span class="size-2 rounded-full bg-brand-600"></span>
+            SISTEM KASIR UNTUK BISNIS YANG BERGERAK
+          </p>
+          <h1 id="hero-title" class="text-[clamp(2.6rem,6.1vw,4.4rem)] font-bold leading-[1.08] tracking-[-.065em] text-slate-950">
+            Satu Sistem.<br>Kendali Penuh<br class="hidden sm:block">
+            <span class="bg-gradient-to-r from-brand-600 to-indigo-400 bg-clip-text text-transparent">Bisnis Anda.</span>
+          </h1>
+          <p class="mx-auto mt-6 max-w-[530px] text-base leading-8 text-slate-500 lg:mx-0">
+            Kelola transaksi secepat kilat, pantau inventaris otomatis, dan terima laporan keuangan real-time. Minimalis di layar, maksimal untuk pertumbuhan usaha.
+          </p>
+          <div class="mt-9 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
+            <a href="/login.html" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-brand-700 focus:outline-none focus:ring-4 focus:ring-indigo-100">
+              Mulai Instan
+              <svg viewBox="0 0 20 20" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10h12M10 4l6 6-6 6"/></svg>
+            </a>
+            <a href="/login.html" class="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white/85 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 focus:outline-none focus:ring-4 focus:ring-indigo-100">
+              Sudah Punya Akun?
+            </a>
+          </div>
+          <div class="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs font-medium text-slate-500 lg:justify-start">
+            <span>✓ Setup cepat</span><span>✓ Data tersinkron</span><span>✓ Siap dipakai</span>
+          </div>
+        </div>
+
+        <div class="relative mx-auto w-full max-w-[560px]" aria-label="Pratinjau dashboard Evora">
+          <div class="absolute -inset-5 rounded-[2rem] bg-gradient-to-br from-indigo-100 via-white to-sky-100 blur-2xl" aria-hidden="true"></div>
+          <div class="relative rounded-[22px] border border-slate-200/80 bg-white p-3 shadow-[0_30px_90px_-35px_rgba(30,41,95,.28)] sm:p-4">
+            <div class="flex items-center justify-between border-b border-slate-100 px-2 pb-3.5">
+              <div class="flex items-center gap-2">
+                <span class="grid size-7 place-items-center rounded-lg bg-brand-600 text-[10px] font-bold text-white">E</span>
+                <span class="text-xs font-bold text-slate-800">Evora</span><span class="text-slate-300">/</span><span class="text-[11px] text-slate-400">Ringkasan</span>
+              </div>
+              <div class="flex items-center gap-2"><span class="hidden rounded-md bg-slate-50 px-2 py-1 text-[9px] text-slate-500 sm:inline">30 hari terakhir</span><span class="grid size-7 place-items-center rounded-full bg-indigo-50 text-[9px] font-bold text-brand-700">EV</span></div>
+            </div>
+            <div class="p-2 pt-4 sm:p-3 sm:pt-5">
+              <p class="text-[10px] text-slate-400">Selamat pagi</p>
+              <div class="mt-1 flex items-center justify-between"><h2 class="text-sm font-bold text-slate-900 sm:text-base">Ringkasan Penjualan</h2><span class="text-[9px] font-semibold text-emerald-600">● Live</span></div>
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <article class="rounded-xl border border-slate-100 p-3.5">
+                  <div class="flex items-center justify-between"><p class="text-[10px] text-slate-500">Total Omzet</p><span class="grid size-6 place-items-center rounded-lg bg-indigo-50 text-brand-600">↗</span></div>
+                  <p class="mt-3 text-lg font-bold text-slate-900 sm:text-xl">Rp 1.546.400</p>
+                  <p class="mt-1 text-[9px] text-slate-400">Ringkasan usaha</p>
+                </article>
+                <article class="rounded-xl border border-slate-100 p-3.5">
+                  <div class="flex items-center justify-between"><p class="text-[10px] text-slate-500">Transaksi</p><span class="grid size-6 place-items-center rounded-lg bg-emerald-50 text-emerald-600">✓</span></div>
+                  <p class="mt-3 text-lg font-bold text-slate-900 sm:text-xl">Tercatat</p>
+                  <p class="mt-1 text-[9px] text-slate-400">Aman dan otomatis</p>
+                </article>
+              </div>
+              <div class="mt-3 rounded-xl border border-slate-100 p-3 sm:p-4">
+                <div class="flex items-center justify-between"><div><h3 class="text-[10px] font-semibold text-slate-700">Performa Penjualan</h3><p class="mt-0.5 text-[9px] text-slate-400">Tren pendapatan toko Anda</p></div><span class="text-[9px] text-brand-600">● Penjualan</span></div>
+                <svg viewBox="0 0 440 112" class="mt-3 h-[100px] w-full" role="img" aria-label="Grafik tren penjualan meningkat">
+                  <defs><linearGradient id="sales-fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#4f46e5" stop-opacity=".18"/><stop offset="100%" stop-color="#4f46e5" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M0 86 C25 79 31 88 58 72 S92 78 112 57 S144 68 167 49 S198 54 220 42 S251 52 274 34 S309 45 331 26 S365 34 386 17 S420 22 440 8 L440 112 L0 112Z" fill="url(#sales-fill)"/>
+                  <path d="M0 25H440M0 56H440M0 87H440" stroke="#f1f5f9" stroke-width="1"/>
+                  <path d="M0 86 C25 79 31 88 58 72 S92 78 112 57 S144 68 167 49 S198 54 220 42 S251 52 274 34 S309 45 331 26 S365 34 386 17 S420 22 440 8" fill="none" stroke="#4f46e5" stroke-linecap="round" stroke-width="2.5"/>
+                  <text x="0" y="108" fill="#94a3b8" font-size="8">01 Nov</text><text x="145" y="108" fill="#94a3b8" font-size="8">10 Nov</text><text x="290" y="108" fill="#94a3b8" font-size="8">20 Nov</text><text x="400" y="108" fill="#94a3b8" font-size="8">30 Nov</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="absolute -bottom-5 -left-3 hidden items-center gap-2 rounded-xl border border-slate-100 bg-white px-3 py-3 text-[10px] font-semibold text-slate-700 shadow-xl sm:flex"><span class="text-emerald-600">✓</span> Transaksi tercatat secara real-time</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="fitur" class="border-y border-slate-100 bg-slate-50/70">
+      <div class="mx-auto grid max-w-7xl gap-4 px-5 py-14 sm:px-8 md:grid-cols-3">
+        <article class="rounded-2xl border border-slate-100 bg-white p-6">
+          <span class="grid size-10 place-items-center rounded-xl bg-indigo-50 text-lg text-brand-600">↗</span>
+          <h2 class="mt-4 text-sm font-bold text-slate-900">Kasir yang cepat</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-500">Catat transaksi dengan alur sederhana supaya Anda lebih fokus melayani pelanggan.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-100 bg-white p-6">
+          <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-lg text-emerald-600">✓</span>
+          <h2 class="mt-4 text-sm font-bold text-slate-900">Inventaris terkendali</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-500">Pantau stok produk dan harga dalam satu ruang kerja yang selalu mudah diakses.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-100 bg-white p-6">
+          <span class="grid size-10 place-items-center rounded-xl bg-amber-50 text-lg text-amber-600">▤</span>
+          <h2 class="mt-4 text-sm font-bold text-slate-900">Laporan yang jelas</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-500">Lihat omzet, keuntungan, dan performa produk untuk membantu keputusan bisnis.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer id="harga" class="bg-white">
+      <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-7 text-center sm:px-8 md:flex-row md:text-left">
+        <span class="text-sm font-bold text-slate-800">Evora</span>
+        <p id="bantuan" class="text-xs text-slate-400">Solusi kasir digital yang bergerak bersama bisnis Anda.</p>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

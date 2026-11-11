@@ -16,7 +16,7 @@ const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY";
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: 'index.html' }));
 
 // Database Setup (SQLite disimpan dalam file lokal pos.db)
 const db = new sqlite3.Database(DB_PATH, (err) => {
@@ -93,6 +93,15 @@ async function initializeDatabase() {
         tanggal TEXT DEFAULT CURRENT_TIMESTAMP,
         detail_barang TEXT NOT NULL,
         total_harga INTEGER NOT NULL
+    )`);
+    await dbRun(`CREATE TABLE IF NOT EXISTS detail_penjualan (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        penjualan_id INTEGER NOT NULL REFERENCES riwayat_penjualan(id) ON DELETE CASCADE,
+        produk_id INTEGER NOT NULL,
+        nama_produk TEXT NOT NULL,
+        jumlah INTEGER NOT NULL,
+        harga_jual INTEGER NOT NULL,
+        harga_beli INTEGER NOT NULL
     )`);
     await dbRun(`CREATE TABLE IF NOT EXISTS pengeluaran (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -391,6 +400,62 @@ app.get(['/api/laporan', '/api/keuangan'], (req, res) => {
     });
 });
 
+app.get('/api/laporan/bulanan', async (req, res) => {
+    const bulan = typeof req.query.bulan === 'string'
+        ? req.query.bulan
+        : new Date().toISOString().slice(0, 7);
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(bulan)) {
+        return res.status(400).json({ error: "Bulan laporan harus berformat YYYY-MM" });
+    }
+
+    const mulai = `${bulan}-01`;
+    try {
+        const [ringkasan, produk, transaksiTanpaRincian] = await Promise.all([
+            dbGet(
+                `SELECT COUNT(id) AS total_nota,
+                        COALESCE(SUM(total_harga), 0) AS omset,
+                        COALESCE(SUM(total_untung), 0) AS keuntungan_bersih
+                 FROM riwayat_penjualan
+                 WHERE tanggal >= ? AND tanggal < date(?, '+1 month')`,
+                [mulai, mulai]
+            ),
+            dbAll(
+                `SELECT d.produk_id, d.nama_produk AS produk,
+                        SUM(d.jumlah) AS jumlah_terjual,
+                        SUM(d.jumlah * d.harga_jual) AS total_omzet,
+                        SUM(d.jumlah * (d.harga_jual - d.harga_beli)) AS keuntungan_bersih
+                 FROM detail_penjualan d
+                 JOIN riwayat_penjualan r ON r.id = d.penjualan_id
+                 WHERE r.tanggal >= ? AND r.tanggal < date(?, '+1 month')
+                 GROUP BY d.produk_id, d.nama_produk
+                 ORDER BY jumlah_terjual DESC, d.nama_produk COLLATE NOCASE ASC`,
+                [mulai, mulai]
+            ),
+            dbGet(
+                `SELECT COUNT(*) AS jumlah
+                 FROM riwayat_penjualan r
+                 WHERE r.tanggal >= ? AND r.tanggal < date(?, '+1 month')
+                   AND NOT EXISTS (
+                       SELECT 1 FROM detail_penjualan d WHERE d.penjualan_id = r.id
+                   )`,
+                [mulai, mulai]
+            )
+        ]);
+        res.json({
+            bulan,
+            total_produk_terjual: produk.reduce((total, item) => total + item.jumlah_terjual, 0),
+            total_omzet: ringkasan.omset,
+            keuntungan_bersih: ringkasan.keuntungan_bersih,
+            total_nota: ringkasan.total_nota,
+            transaksi_tanpa_rincian: transaksiTanpaRincian.jumlah,
+            produk
+        });
+    } catch (error) {
+        console.error("Gagal memuat laporan bulanan:", error.message);
+        res.status(500).json({ error: "Gagal memuat laporan bulanan" });
+    }
+});
+
 // Input Pengeluaran Baru (Kulakan barang, bayar listrik, dll)
 app.post('/api/keuangan/pengeluaran', (req, res) => {
     const { keterangan, jumlah_biaya } = req.body;
@@ -547,12 +612,14 @@ app.post('/api/transaksi', (req, res) => {
         const jumlah = Number(item.jumlah ?? item.qty);
         const id = item.id === undefined ? null : Number(item.id);
         const nama = typeof item.nama === "string" ? item.nama.trim() : "";
+        const hargaJualDiharapkan = item.harga_jual === undefined ? null : Number(item.harga_jual);
         if (!Number.isSafeInteger(jumlah) || jumlah <= 0 ||
             (id !== null && (!Number.isSafeInteger(id) || id <= 0)) ||
+            (hargaJualDiharapkan !== null && (!Number.isSafeInteger(hargaJualDiharapkan) || hargaJualDiharapkan < 0)) ||
             (id === null && !nama)) {
             return res.status(400).json({ success: false, error: "Produk atau jumlah tidak valid" });
         }
-        itemTervalidasi.push({ id, nama, jumlah });
+        itemTervalidasi.push({ id, nama, jumlah, hargaJualDiharapkan });
     }
 
     withTransaction(async () => {
@@ -567,6 +634,14 @@ app.post('/api/transaksi', (req, res) => {
             if (!produk) {
                 const identitasProduk = item.id === null ? `"${item.nama}"` : `ID ${item.id}`;
                 throw createRouteError(404, `Produk ${identitasProduk} tidak ditemukan`);
+            }
+            const hargaJualAktual = produk.harga_jual ?? produk.harga;
+            if (!Number.isSafeInteger(hargaJualAktual) || hargaJualAktual <= 0 ||
+                !Number.isSafeInteger(produk.harga_beli) || produk.harga_beli < 0) {
+                throw createRouteError(400, `Harga produk "${produk.nama}" belum valid. Periksa kembali harga jual dan modal.`);
+            }
+            if (item.hargaJualDiharapkan !== null && item.hargaJualDiharapkan !== hargaJualAktual) {
+                throw createRouteError(409, `Harga "${produk.nama}" berubah. Data produk telah diperbarui; periksa kembali sebelum membayar.`);
             }
             const ringkasanItem = jumlahPerProduk.get(produk.id);
             if (ringkasanItem) {
@@ -603,24 +678,47 @@ app.post('/api/transaksi', (req, res) => {
         if (uangDiterima !== null && uangDiterima < totalHarga) {
             throw createRouteError(400, `Uang diterima kurang ${totalHarga - uangDiterima}`);
         }
-        await dbRun(
+        const transaksi = await dbRun(
             "INSERT INTO riwayat_penjualan (detail_barang, total_harga, total_untung) VALUES (?, ?, ?)",
             [rincian.join(', '), totalHarga, totalUntung]
         );
+        for (const { produk, jumlah } of jumlahPerProduk.values()) {
+            await dbRun(
+                `INSERT INTO detail_penjualan
+                    (penjualan_id, produk_id, nama_produk, jumlah, harga_jual, harga_beli)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [transaksi.lastID, produk.id, produk.nama, jumlah, produk.harga_jual ?? produk.harga, produk.harga_beli]
+            );
+        }
         const rekap = await dbGet(
             "SELECT COALESCE(SUM(total_harga), 0) AS totalOmset, COALESCE(SUM(total_untung), 0) AS keuntunganBersih, COUNT(id) AS transaksiSukses FROM riwayat_penjualan"
         );
+        const transaksiTersimpan = await dbGet(
+            "SELECT tanggal FROM riwayat_penjualan WHERE id = ?",
+            [transaksi.lastID]
+        );
         return {
+            nomorNota: transaksi.lastID,
+            tanggalTransaksi: transaksiTersimpan.tanggal,
+            detailTransaksi: [...jumlahPerProduk.values()].map(({ produk, jumlah }) => ({
+                nama_produk: produk.nama,
+                jumlah,
+                harga_jual: produk.harga_jual ?? produk.harga,
+                subtotal: (produk.harga_jual ?? produk.harga) * jumlah
+            })),
             totalHarga,
             totalUntung,
             rekap,
             uangDiterima,
             kembalian: uangDiterima === null ? null : uangDiterima - totalHarga
         };
-    }).then(({ totalHarga, totalUntung, rekap, uangDiterima: diterima, kembalian }) => {
+    }).then(({ nomorNota, tanggalTransaksi, detailTransaksi, totalHarga, totalUntung, rekap, uangDiterima: diterima, kembalian }) => {
         res.json({
             success: true,
             msg: "Transaksi berhasil disimpan!",
+            nomor_nota: nomorNota,
+            tanggal: tanggalTransaksi,
+            detail_transaksi: detailTransaksi,
             total_harga: totalHarga,
             total_untung: totalUntung,
             uang_diterima: diterima,
