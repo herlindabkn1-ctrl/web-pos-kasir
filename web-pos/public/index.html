@@ -9,6 +9,33 @@
   <style>
     body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     .sidebar-transition { transition: transform 180ms ease-in-out; }
+    .auth-screen-grid { min-height: 100vh; padding: 0; background: #e0f2fe; }
+    .auth-screen-grid:not(.hidden) { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .auth-welcome-panel { display: flex; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 3rem clamp(1.5rem, 5vw, 5rem); background: linear-gradient(135deg, #bae6fd 0%, #e0f2fe 50%, #f0f9ff 100%); text-align: center; }
+    .auth-store-illustration { width: min(100%, 34rem); height: auto; }
+    .auth-welcome-title { max-width: 35rem; margin-top: 1.5rem; color: #0c3b66; font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.12; }
+    .auth-welcome-subtitle { margin-top: .75rem; color: #25618a; font-size: 1.1rem; font-weight: 600; }
+    .auth-form-panel { position: relative; display: flex; min-height: 100vh; align-items: center; justify-content: center; overflow: hidden; padding: 2rem clamp(1.25rem, 4vw, 4rem); background: linear-gradient(145deg, #e0f2fe 0%, #f8fafc 78%); }
+    .auth-form-card { position: relative; z-index: 1; width: min(100%, 29rem); border: 1px solid rgba(255,255,255,.9); border-radius: 20px; background: #fff; padding: clamp(1.5rem, 4vw, 2.5rem); box-shadow: 0 24px 70px rgba(14, 74, 117, .14); }
+    .auth-form-panel::before, .auth-form-panel::after { position: absolute; right: -12%; bottom: -7rem; left: -12%; height: 15rem; border-radius: 50% 50% 0 0 / 35% 35% 0 0; background: rgba(186,230,253,.38); content: ""; transform: rotate(-5deg); }
+    .auth-form-panel::after { right: -18%; bottom: -9rem; left: -18%; background: rgba(255,255,255,.55); transform: rotate(5deg); }
+    .auth-tab { border-radius: 9999px; padding: .8rem 1rem; color: #64748b; font-size: .9rem; font-weight: 700; transition: background .2s, color .2s, box-shadow .2s; }
+    .auth-tab[aria-selected="true"] { background: linear-gradient(120deg, #38bdf8, #2563eb); color: #fff; box-shadow: 0 6px 16px rgba(37,99,235,.24); }
+    .auth-input { width: 100%; border: 1px solid #dbe5ef; border-radius: .75rem; background: #f8fafc; padding: .85rem 2.9rem; color: #0f172a; outline: none; transition: border-color .2s, box-shadow .2s, background .2s; }
+    .auth-input:focus { border-color: #38bdf8; background: #fff; box-shadow: 0 0 0 4px rgba(56,189,248,.14); }
+    .auth-input-icon { pointer-events: none; position: absolute; top: 50%; left: .95rem; width: 1.15rem; height: 1.15rem; color: #94a3b8; transform: translateY(-50%); }
+    .auth-submit-button { width: 100%; border-radius: .75rem; background: linear-gradient(120deg, #38bdf8, #2563eb); padding: .9rem 1rem; color: #fff; font-size: .95rem; font-weight: 700; box-shadow: 0 8px 18px rgba(37,99,235,.2); transition: transform .2s, box-shadow .2s; }
+    .auth-submit-button:hover { transform: translateY(-1px); box-shadow: 0 12px 22px rgba(37,99,235,.25); }
+    .auth-admin-info { display: flex; align-items: center; gap: .65rem; border: 1px solid #bae6fd; border-radius: .8rem; background: #f0f9ff; padding: .9rem 1rem; color: #075985; font-size: .9rem; font-weight: 650; }
+    @media (max-width: 767px) {
+      .auth-screen-grid:not(.hidden) { grid-template-columns: minmax(0, 1fr); }
+      .auth-welcome-panel { min-height: 0; padding: 2.5rem 1.5rem 2rem; }
+      .auth-store-illustration { width: min(100%, 23rem); }
+      .auth-welcome-title { margin-top: 1rem; font-size: clamp(1.65rem, 7vw, 2.25rem); }
+      .auth-welcome-subtitle { margin-top: .5rem; font-size: 1rem; }
+      .auth-form-panel { min-height: 0; padding: 1.5rem 1rem 2.5rem; }
+      .auth-form-panel::before, .auth-form-panel::after { bottom: -8rem; }
+    }
     @media print {
       body.printing * { visibility: hidden !important; }
       body.printing #receipt-modal, body.printing #receipt-modal * { visibility: visible !important; }
@@ -23,40 +50,99 @@
   </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 antialiased">
-  <section id="auth-screen" class="hidden min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-100 to-blue-200 px-4 py-10">
-    <div class="w-full max-w-md">
-      <div class="mb-7 text-center">
-        <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-indigo-900/15">
-          <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 4l9 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-9ZM8 21v-7h8v7"/></svg>
-        </span>
-        <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900">Sembako Jaya</h1>
-        <p class="mt-1 text-sm text-slate-500">Masuk untuk mengelola toko dan transaksi</p>
-      </div>
-      <div class="rounded-2xl border border-white/80 bg-white p-6 shadow-xl shadow-slate-900/10 sm:p-8">
-        <h2 id="auth-title" class="text-xl font-bold text-slate-900">Masuk</h2>
-        <p id="auth-description" class="mt-1 text-sm text-slate-500"></p>
+  <section id="auth-screen" class="auth-screen-grid hidden">
+    <div class="auth-welcome-panel">
+      <svg class="auth-store-illustration" viewBox="0 0 620 430" role="img" aria-labelledby="store-illustration-title store-illustration-description" xmlns="http://www.w3.org/2000/svg">
+        <title id="store-illustration-title">Kios bahan pokok Sembako Jaya</title>
+        <desc id="store-illustration-description">Ilustrasi toko dengan kanopi biru putih dan rak beras, minyak, telur, gula, tepung, serta kaleng makanan.</desc>
+        <ellipse cx="310" cy="391" rx="235" ry="20" fill="#7dd3fc" opacity=".38"/>
+        <path d="M92 159 137 83h346l45 76v207H92z" fill="#fff" stroke="#7cafd0" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M137 83h346l45 76H92z" fill="#e0f2fe" stroke="#7cafd0" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M137 83h58l-22 76h-81zm116 0h58l-7 76h-73zm116 0h58l7 76h-73zm114 0h-58l22 76h81z" fill="#38bdf8"/>
+        <path d="M137 83h58l-22 76h-81zm116 0h58l-7 76h-73zm116 0h58l7 76h-73zm114 0h-58l22 76h81z" fill="none" stroke="#fff" stroke-width="5"/>
+        <path d="M115 153h435v22H115z" fill="#0284c7"/>
+        <rect x="177" y="106" width="266" height="43" rx="12" fill="#fff"/>
+        <text x="310" y="135" fill="#075985" font-family="Inter,Arial,sans-serif" font-size="25" font-weight="800" text-anchor="middle">Sembako Jaya</text>
+        <rect x="113" y="178" width="394" height="179" rx="8" fill="#f8fdff" stroke="#c4dfef" stroke-width="4"/>
+        <path d="M310 179v178M114 267h393" stroke="#a9c9dc" stroke-width="5"/>
+        <path d="M122 259h377M318 259h181" stroke="#d7e8f2" stroke-width="3"/>
+        <rect x="132" y="199" width="66" height="49" rx="8" fill="#fde68a" stroke="#d6a53c" stroke-width="3"/>
+        <path d="M144 211h42M144 220h42M144 229h31" stroke="#b7791f" stroke-width="3" stroke-linecap="round"/>
+        <rect x="210" y="194" width="37" height="56" rx="9" fill="#facc15" stroke="#d6a53c" stroke-width="3"/>
+        <rect x="219" y="186" width="19" height="10" rx="3" fill="#f59e0b"/>
+        <path d="M216 218h25" stroke="#fff7ae" stroke-width="6"/>
+        <rect x="257" y="205" width="38" height="44" rx="7" fill="#fef3c7" stroke="#d6a53c" stroke-width="3"/>
+        <path d="M263 215h26m-26 8h26m-26 8h26" stroke="#eab308" stroke-width="3"/>
+        <rect x="337" y="199" width="48" height="51" rx="6" fill="#fb923c" stroke="#c66b2b" stroke-width="3"/>
+        <path d="M345 210h32m-32 8h32m-32 8h24" stroke="#fff7ed" stroke-width="3"/>
+        <rect x="398" y="203" width="43" height="46" rx="5" fill="#fde68a" stroke="#d6a53c" stroke-width="3"/>
+        <path d="M405 215h29m-29 8h29m-29 8h24" stroke="#ca8a04" stroke-width="3"/>
+        <rect x="451" y="207" width="36" height="42" rx="6" fill="#ef4444" stroke="#b91c1c" stroke-width="3"/>
+        <ellipse cx="469" cy="207" rx="18" ry="5" fill="#fca5a5" stroke="#b91c1c" stroke-width="2"/>
+        <path d="M129 281h166v65H129z" fill="#dbeafe" stroke="#93b9d1" stroke-width="3"/>
+        <path d="M143 296h138m-138 12h138" stroke="#a9c9dc" stroke-width="3"/>
+        <path d="M146 291q0-12 13-12h25q13 0 13 12v52h-51z" fill="#f5deb3" stroke="#b88a55" stroke-width="3"/>
+        <path d="M152 306h39M152 314h39" stroke="#d6b77c" stroke-width="3"/>
+        <text x="172" y="333" fill="#8b6a3d" font-family="Arial,sans-serif" font-size="12" font-weight="700" text-anchor="middle">BERAS</text>
+        <path d="M213 293h24v51h-24z" fill="#facc15" stroke="#d6a53c" stroke-width="3"/>
+        <rect x="218" y="285" width="14" height="9" rx="3" fill="#f59e0b"/>
+        <path d="M214 313h22" stroke="#fff7ae" stroke-width="5"/>
+        <path d="M246 302q0-13 12-13t12 13v32h-24z" fill="#fff" stroke="#cbd5e1" stroke-width="3"/>
+        <path d="M253 302q5-7 10 0" fill="none" stroke="#f59e0b" stroke-width="4"/>
+        <path d="M277 302q0-13 12-13t12 13v32h-24z" fill="#fff" stroke="#cbd5e1" stroke-width="3"/>
+        <path d="M284 302q5-7 10 0" fill="none" stroke="#f59e0b" stroke-width="4"/>
+        <rect x="328" y="282" width="53" height="61" rx="8" fill="#fde68a" stroke="#d6a53c" stroke-width="3"/>
+        <path d="M337 295h35m-35 8h35m-35 8h28" stroke="#ca8a04" stroke-width="3"/>
+        <text x="354" y="332" fill="#92400e" font-family="Arial,sans-serif" font-size="10" font-weight="700" text-anchor="middle">GULA</text>
+        <rect x="390" y="285" width="52" height="58" rx="7" fill="#f5deb3" stroke="#b88a55" stroke-width="3"/>
+        <path d="M399 298h34m-34 8h34m-34 8h27" stroke="#c49a6c" stroke-width="3"/>
+        <text x="416" y="333" fill="#8b6a3d" font-family="Arial,sans-serif" font-size="9" font-weight="700" text-anchor="middle">TERIGU</text>
+        <rect x="451" y="290" width="39" height="53" rx="8" fill="#ef4444" stroke="#b91c1c" stroke-width="3"/>
+        <ellipse cx="470.5" cy="290" rx="19.5" ry="5" fill="#fca5a5" stroke="#b91c1c" stroke-width="2"/>
+        <path d="M458 311h25m-25 7h25" stroke="#fff" stroke-width="3"/>
+        <rect x="74" y="354" width="472" height="17" rx="8" fill="#0284c7"/>
+        <path d="M101 371v15m418-15v15" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+      <h1 class="auth-welcome-title">Selamat Datang di Toko Sembako Jaya</h1>
+      <p class="auth-welcome-subtitle">Kelola Toko Lebih Pintar</p>
+    </div>
+    <div class="auth-form-panel">
+      <div class="auth-form-card">
+        <div class="mb-7 text-center">
+          <span class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-sky-100 text-sky-700">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 4l9 6.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-9ZM8 21v-7h8v7"/></svg>
+          </span>
+          <h2 id="auth-title" class="mt-4 text-2xl font-bold tracking-tight text-slate-900">Sembako Jaya</h2>
+          <p id="auth-description" class="mt-1 text-sm text-slate-500">Sistem Kasir &amp; Manajemen Toko</p>
+        </div>
         <div id="auth-error" class="mt-4 hidden rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700" role="alert"></div>
-        <form id="auth-form" class="mt-6 space-y-4">
-          <label id="auth-name-wrap" class="hidden block text-sm font-medium text-slate-700">Nama kasir / admin
-            <input name="nama" maxlength="80" autocomplete="name" class="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
+        <div id="auth-tabs" class="grid grid-cols-2 gap-2 rounded-full bg-slate-100 p-1.5" role="tablist" aria-label="Pilih jenis akun">
+          <button id="auth-admin-tab" type="button" role="tab" aria-selected="false" class="auth-tab">Admin</button>
+          <button id="auth-cashier-tab" type="button" role="tab" aria-selected="true" class="auth-tab">Kasir</button>
+        </div>
+        <div id="auth-admin-badge" class="auth-admin-info mt-5 hidden">
+          <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 11v5m0-8h.01"/></svg>
+          <span>Masuk sebagai Admin: Herlinda</span>
+        </div>
+        <form id="auth-form" class="mt-5 space-y-5">
+          <label id="auth-name-wrap" class="block text-sm font-semibold text-slate-700">Nama Kasir
+            <span class="relative mt-2 block">
+              <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+              <input name="nama" minlength="3" maxlength="32" autocomplete="name" required class="auth-input">
+            </span>
           </label>
-          <label class="block text-sm font-medium text-slate-700">Username
-            <input name="username" required minlength="3" maxlength="32" autocomplete="username" class="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
-          </label>
-          <label class="block text-sm font-medium text-slate-700">Kata sandi
-            <span class="relative mt-1.5 block">
-              <input id="auth-password" name="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password" class="w-full rounded-lg border border-slate-200 px-3 py-2.5 pr-12 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
-              <button id="toggle-password" type="button" class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-500 transition hover:text-indigo-700" aria-label="Tampilkan kata sandi" aria-pressed="false">
+          <input name="username" type="hidden">
+          <label class="block text-sm font-semibold text-slate-700"><span id="auth-password-label">Kata sandi</span>
+            <span class="relative mt-2 block">
+              <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 1 1 8 0v3m-4 5v2"/></svg>
+              <input id="auth-password" name="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password" class="auth-input pr-12">
+              <button id="toggle-password" type="button" class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition hover:text-sky-700" aria-label="Tampilkan kata sandi" aria-pressed="false">
                 <svg data-eye-icon class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
               </button>
             </span>
           </label>
-          <button id="auth-submit" type="submit" class="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">Masuk</button>
+          <button id="auth-submit" type="submit" class="auth-submit-button">Daftar &amp; Masuk</button>
         </form>
-        <p class="mt-5 text-center text-sm text-slate-500"><span id="auth-switch-prompt"></span>
-          <button id="auth-switch" type="button" class="font-semibold text-indigo-700 transition duration-200 hover:text-blue-800"></button>
-        </p>
-        <p class="mt-5 rounded-lg bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-500">Akun dan data toko disimpan pada penyimpanan browser perangkat ini.</p>
       </div>
     </div>
   </section>
@@ -110,6 +196,7 @@
   (() => {
     'use strict';
     const STORAGE_KEY = 'sembako-jaya-pos-v1';
+    const OPERATING_EXPENSES_STORAGE_KEY = 'sembako_expenses';
     const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
     const CATEGORY_SEEDS = [{id:1,nama:'Makanan'},{id:2,nama:'Minuman'},{id:3,nama:'Bahan Sembako'}];
     const PRODUCT_SEEDS = [
@@ -134,11 +221,13 @@
       {key:'suppliers',title:'Suppliers',group:'Master data',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a3.5 3.5 0 0 0 0-7M17 14h.5a4.5 4.5 0 0 1 4.5 4.5V20"/>'},
       {key:'purchases',title:'Purchases',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>'},
       {key:'transactions',title:'Transactions',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8 13h8M8 17h8"/>'},
+      {key:'expenses',title:'Pengeluaran',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m5-14H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
       {key:'finance',title:'Laporan Keuangan',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6m4 6V4"/>'}
     ];
     let store = loadStore();
+    let operatingExpenses = loadOperatingExpenses();
     let activeUser = store.sessionUser || null;
-    let authMode = 'login';
+    let registerRole = 'Kasir';
     let page = 'dashboard';
     let cart = [];
     let purchaseCart = [];
@@ -195,6 +284,26 @@
       } catch(error) {
         console.error('Gagal menyimpan data POS ke browser:',error);
         showToast('Penyimpanan browser penuh atau tidak tersedia. Perubahan belum tersimpan.',true);
+        return false;
+      }
+    }
+    function loadOperatingExpenses() {
+      try {
+        const saved=JSON.parse(localStorage.getItem(OPERATING_EXPENSES_STORAGE_KEY)||'[]');
+        if(!Array.isArray(saved)) throw Error('Format data pengeluaran operasional tidak valid.');
+        return saved.filter(item=>item&&Number.isSafeInteger(Number(item.nominal))&&Number(item.nominal)>0&&Number.isFinite(Number(item.timestamp)));
+      } catch(error) {
+        console.error('Data pengeluaran operasional tidak dapat dibaca:',error);
+        return [];
+      }
+    }
+    function persistOperatingExpenses() {
+      try {
+        localStorage.setItem(OPERATING_EXPENSES_STORAGE_KEY,JSON.stringify(operatingExpenses));
+        return true;
+      } catch(error) {
+        console.error('Gagal menyimpan pengeluaran operasional:',error);
+        showToast('Pengeluaran belum tersimpan. Periksa penyimpanan browser.',true);
         return false;
       }
     }
@@ -275,7 +384,7 @@
       return activeUser?.role==='Admin'&&String(activeUser.username||'').trim().toLowerCase()==='herlinda';
     }
     function canAccessPage(pageKey) {
-      return isAdmin()||['dashboard','cashier','transactions'].includes(pageKey);
+      return isAdmin()||['dashboard','cashier','transactions','expenses'].includes(pageKey);
     }
     function escapeHtml(value) {
       return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -284,6 +393,11 @@
     function nextId(rows) { return rows.reduce((max,row)=>Math.max(max,Number(row.id)||0),0)+1; }
     function categoryName(id) { return store.categories.find(row=>Number(row.id)===Number(id))?.nama||'Tanpa kategori'; }
     function currentDate() { return new Date(); }
+    function localDateKey(value) {
+      const date=new Date(value);
+      if(Number.isNaN(date.getTime())) return '';
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    }
     function invoiceNumber(date) {
       const stamp=`${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}`;
       const seq=String(store.transactions.filter(item=>new Date(item.timestamp).toDateString()===date.toDateString()).length+1).padStart(3,'0');
@@ -302,19 +416,27 @@
       toastTimer=setTimeout(()=>el.classList.add('hidden'),4200);
     }
     function authRender() {
-      const login=authMode==='login';
+      const adminLogin=registerRole==='Admin';
       const auth=document.getElementById('auth-screen');
       auth.classList.remove('hidden');
       auth.classList.add('flex');
       document.getElementById('app-shell').classList.add('hidden');
-      document.getElementById('auth-title').textContent=login?'Masuk ke akun':'Daftar akun kasir / admin';
-      document.getElementById('auth-description').textContent=login?'Masuk menggunakan username dan kata sandi Anda.':'Buat akun baru untuk mengelola toko Sembako Jaya.';
-      document.getElementById('auth-name-wrap').classList.toggle('hidden',login);
-      document.querySelector('#auth-name-wrap input').required=!login;
-      document.querySelector('#auth-form [name="password"]').autocomplete=login?'current-password':'new-password';
-      document.getElementById('auth-submit').textContent=login?'Masuk':'Daftar akun';
-      document.getElementById('auth-switch-prompt').textContent=login?'Belum punya akun? ':'Sudah punya akun? ';
-      document.getElementById('auth-switch').textContent=login?'Daftar sekarang':'Masuk di sini';
+      document.getElementById('auth-title').textContent='Sembako Jaya';
+      document.getElementById('auth-description').textContent='Sistem Kasir & Manajemen Toko';
+      document.getElementById('auth-admin-badge').classList.toggle('hidden',!adminLogin);
+      document.getElementById('auth-name-wrap').classList.toggle('hidden',adminLogin);
+      const nameInput=document.querySelector('#auth-name-wrap input');
+      nameInput.required=!adminLogin;
+      nameInput.value=adminLogin?'Herlinda':'';
+      const usernameInput=document.querySelector('#auth-form [name="username"]');
+      usernameInput.value=adminLogin?'herlinda':'';
+      document.getElementById('auth-password-label').textContent=adminLogin?'Password':'Kata sandi';
+      document.querySelector('#auth-form [name="password"]').autocomplete=adminLogin?'current-password':'new-password';
+      document.getElementById('auth-submit').textContent=adminLogin?'Masuk':'Daftar & Masuk';
+      const adminTab=document.getElementById('auth-admin-tab');
+      const cashierTab=document.getElementById('auth-cashier-tab');
+      adminTab.setAttribute('aria-selected',String(adminLogin));
+      cashierTab.setAttribute('aria-selected',String(!adminLogin));
       document.getElementById('auth-error').classList.add('hidden');
     }
     function showApp() {
@@ -331,17 +453,24 @@
     function authSubmit(event) {
       event.preventDefault();
       const form=event.currentTarget;
-      const username=form.elements.username.value.trim().toLowerCase();
+      const username=registerRole==='Admin'?'herlinda':form.elements.nama.value.trim();
+      form.elements.username.value=username;
       const password=form.elements.password.value;
       const error=document.getElementById('auth-error');
       try {
-        if(authMode==='register') {
+        if(registerRole==='Kasir') {
           const nama=form.elements.nama.value.trim();
-          if(!nama||nama.length>80) throw Error('Nama kasir/admin wajib diisi (maksimal 80 karakter).');
-          if(!/^[a-z0-9._-]{3,32}$/.test(username)) throw Error('Username harus 3–32 karakter: huruf, angka, titik, garis bawah, atau strip.');
-          if(username==='herlinda') throw Error('Username HERLINDA khusus untuk akun Admin.');
+          if(nama.length<3||nama.length>32) throw Error('Nama Kasir harus terdiri dari 3–32 karakter.');
+          if(username.toLowerCase()==='herlinda') throw Error('Nama tersebut khusus untuk Admin.');
           if(password.length<8) throw Error('Kata sandi harus memiliki minimal 8 karakter.');
-          if(store.accounts.some(account=>String(account.username||'').trim().toLowerCase()===username)) throw Error('Username tersebut sudah digunakan.');
+          const existing=store.accounts.find(row=>String(row.username||'').trim().toLowerCase()===username.toLowerCase());
+          if(existing) {
+            if(existing.password!==password) throw Error('Kata sandi tidak sesuai.');
+            activeUser={id:existing.id,nama:existing.nama,username:existing.username,role:'Kasir'};
+            if(!persist()) throw Error('Tidak dapat menyimpan sesi ke localStorage.');
+            page='dashboard';showApp();
+            return;
+          }
           const account={id:nextId(store.accounts),nama,username,password,role:'Kasir'};
           store.accounts.push(account);
           activeUser={id:account.id,nama:account.nama,username:account.username,role:account.role};
@@ -349,8 +478,17 @@
           page='dashboard';showApp();showToast('Akun berhasil dibuat. Selamat datang!');
           return;
         }
+        if(registerRole==='Admin') {
+          if(password!=='admin123') throw Error('Kata sandi Admin salah. Akses ditolak.');
+          const admin=store.accounts.find(account=>String(account.username||'').trim().toLowerCase()==='herlinda');
+          if(!admin) throw Error('Akun Admin tidak tersedia.');
+          activeUser={id:admin.id,nama:'HERLINDA',username:'herlinda',role:'Admin'};
+          if(!persist()) throw Error('Tidak dapat menyimpan sesi ke localStorage.');
+          page='dashboard';showApp();
+          return;
+        }
         const account=store.accounts.find(row=>String(row.username||'').trim().toLowerCase()===username);
-        const validAdminPassword=username==='herlinda'&&['admin123','herlinda123'].includes(password);
+        const validAdminPassword=username==='herlinda'&&password==='admin123';
         if(!account||!(validAdminPassword||account.password===password)) throw Error('Username atau kata sandi tidak sesuai.');
         const adminLogin=username==='herlinda';
         activeUser={id:account.id,nama:adminLogin?'HERLINDA':account.nama,username:adminLogin?'herlinda':account.username,role:adminLogin?'Admin':'Kasir'};
@@ -363,7 +501,7 @@
     }
     function navHtml() {
       return ['Menu utama','Master data','Operasional'].map(group=>{
-        const items=NAV_ITEMS.filter(item=>item.group===group&&(isAdmin()||['dashboard','cashier','transactions'].includes(item.key)));
+        const items=NAV_ITEMS.filter(item=>item.group===group&&(isAdmin()||['dashboard','cashier','transactions','expenses'].includes(item.key)));
         return items.length?`<div><p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">${group}</p><div class="space-y-1">${items.map(item=>`<a href="/?page=${item.key}" data-page="${item.key}" ${page===item.key?'aria-current="page"':''} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${page===item.key?'bg-indigo-50 font-semibold text-indigo-700':'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${item.icon}</svg>${item.title}</a>`).join('')}</div></div>`:'';
       }).join('');
     }
@@ -392,6 +530,9 @@
       const monthKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
       const transactions=store.transactions.filter(item=>String(item.tanggal).slice(0,7)===monthKey).sort((a,b)=>b.timestamp-a.timestamp);
       const sales=transactions.reduce((sum,item)=>sum+Number(item.total),0);
+      const stockExpensesThisMonth=store.expenses.filter(item=>localDateKey(Number(item.timestamp)||item.tanggal).slice(0,7)===monthKey).reduce((sum,item)=>sum+Number(item.total||0),0);
+      const operatingExpensesThisMonth=operatingExpenses.filter(item=>localDateKey(item.timestamp).slice(0,7)===monthKey).reduce((sum,item)=>sum+Number(item.nominal),0);
+      const netBalance=sales-stockExpensesThisMonth-operatingExpensesThisMonth;
       const recent=transactions.slice(0,10).map(item=>row([
         escapeHtml(dateTime(item.timestamp)),
         `<span class="font-semibold text-indigo-700">${escapeHtml(item.nomor)}</span>`,
@@ -399,10 +540,12 @@
         `<span class="font-semibold text-slate-900">${money(item.total)}</span>`
       ])).join('');
       return `${sectionTitle('Ringkasan Penjualan Bulan Ini',`Ringkasan toko untuk ${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}.`)}
-        <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-label="Ringkasan penjualan">
+        <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-label="Ringkasan penjualan dan pengeluaran">
           <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Penjualan</p><p class="mt-3 text-2xl font-bold tracking-tight text-slate-900">${money(sales)}</p><p class="mt-1 text-xs text-slate-500">Akumulasi bulan ini</p><span class="mt-5 inline-block rounded-lg bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-600">Omzet Bulan Ini</span></article>
           <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Transaksi</p><p class="mt-3 text-2xl font-bold tracking-tight text-slate-900">${transactions.length.toLocaleString('id-ID')} nota</p><p class="mt-1 text-xs text-slate-500">Nota bulan ini</p><span class="mt-5 inline-block rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600">Transaksi tersimpan</span></article>
           <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Status Kasir</p><p class="mt-3 text-lg font-bold text-emerald-700">${escapeHtml(activeUser?.nama||'Kasir')} · Aktif</p><p class="mt-1 text-xs text-slate-500">Kasir yang sedang bertugas</p><span class="mt-5 inline-block rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600">Sesi aktif</span></article>
+          <article class="rounded-2xl border border-rose-100 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Biaya Operasional</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(operatingExpensesThisMonth)}</p><p class="mt-1 text-xs text-slate-500">Pengeluaran kasir bulan ini</p><a href="/?page=expenses" data-page="expenses" class="mt-5 inline-block rounded-lg bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100">Lihat pengeluaran</a></article>
+          <article class="rounded-2xl border border-sky-100 bg-sky-50 p-6 shadow-sm"><p class="text-sm font-medium text-sky-800">Saldo Bersih Bulan Ini</p><p class="mt-3 text-2xl font-bold tracking-tight text-sky-900">${money(netBalance)}</p><p class="mt-1 text-xs text-sky-700">Setelah biaya stok dan operasional</p></article>
         </section>
         <section class="mt-8"><div class="mb-4"><h2 class="font-semibold text-slate-900">Transaksi Terbaru</h2><p class="mt-1 text-xs text-slate-500">Riwayat nota penjualan bulan ini</p></div>${table(['Tanggal','ID Transaksi','Kasir','Total Belanja'],recent,'Belum ada transaksi pada bulan ini.')}</section>`;
     }
@@ -461,9 +604,9 @@
       const paid=Number(document.querySelector('#cashier-form [name="tunai"]')?.value||0);
       const change=paid-total;
       const filters=['Semua',...CATEGORY_SEEDS.map(category=>category.nama)];
-      const productCards=visible.map(product=>`<article class="rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-indigo-300 hover:shadow-md">
-        <div class="flex items-start justify-between gap-2"><span class="grid h-10 w-10 place-items-center rounded-lg bg-indigo-50 text-indigo-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4 7.5 8-4.5 8 4.5v9L12 21l-8-4.5v-9Zm.5.3 7.5 4.4 7.5-4.4M12 12.5V21"/></svg></span><span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-500">Stok ${product.stok}</span></div>
-        <span class="mt-4 block text-sm font-semibold text-slate-900">${escapeHtml(product.nama)}</span><span class="mt-1 block text-xs text-slate-500">${escapeHtml(categoryName(product.kategori_id))} · ${escapeHtml(product.kode)}</span><span class="mt-3 block text-base font-bold text-indigo-700">${money(product.harga_jual)}</span>
+      const productCards=visible.map(product=>`<article class="flex h-full flex-col rounded-xl border border-slate-200 bg-[#FFFFFF] p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-900/10">
+        <div class="flex items-start justify-between gap-2"><span class="grid h-10 w-10 place-items-center rounded-lg bg-indigo-50 text-indigo-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4 7.5 8-4.5 8 4.5v9L12 21l-8-4.5v-9Zm.5.3 7.5 4.4 7.5-4.4M12 12.5V21"/></svg></span><span class="whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${product.stok<=product.stok_minimum?'bg-rose-50 text-rose-700 ring-rose-200':'bg-emerald-50 text-emerald-700 ring-emerald-200'}">Stok ${product.stok}</span></div>
+        <span class="mt-4 block h-10 overflow-hidden text-sm font-semibold leading-5 text-slate-900">${escapeHtml(product.nama)}</span><span class="mt-1 block h-8 overflow-hidden text-xs leading-4 text-slate-500">${escapeHtml(categoryName(product.kategori_id))} · ${escapeHtml(product.kode)}</span><span class="mt-auto block pt-3 text-lg font-bold tracking-tight text-indigo-700">${money(product.harga_jual)}</span>
         <button type="button" data-action="add-cart" data-id="${product.id}" class="mt-4 w-full rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100">+ Tambah ke Keranjang</button>
       </article>`).join('');
       return `${sectionTitle('Halaman Kasir','Cari produk, tambahkan ke keranjang, lalu selesaikan pembayaran.')}
@@ -536,6 +679,41 @@
       ])).join('');
       return `${sectionTitle('Transactions','Riwayat nota lengkap. Klik nomor nota untuk melihat dan mencetak struk.')}${table(['Tanggal & waktu','ID Transaksi','Nama Kasir','Rincian item','Metode Pembayaran','Total belanja'],rows,'Belum ada transaksi penjualan.')}`;
     }
+    function renderOperatingExpenses() {
+      const today=localDateKey(currentDate());
+      const todayTotal=operatingExpenses.filter(item=>localDateKey(item.timestamp)===today).reduce((sum,item)=>sum+Number(item.nominal),0);
+      const rows=operatingExpenses.slice().sort((a,b)=>Number(b.timestamp)-Number(a.timestamp)).map(item=>row([
+        escapeHtml(dateTime(item.timestamp)),
+        `<span class="font-medium text-slate-800">${escapeHtml(item.kategori)}</span><div class="mt-1 max-w-md whitespace-normal text-xs text-slate-500">${escapeHtml(item.keterangan)}</div>`,
+        escapeHtml(item.kasir),
+        `<span class="font-semibold text-rose-700">${money(item.nominal)}</span>`
+      ])).join('');
+      const dateValue=today;
+      return `${sectionTitle('Pengeluaran','Catat biaya operasional harian toko.')}
+        <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <h2 class="font-semibold text-slate-900">Catat pengeluaran baru</h2>
+          <form id="operating-expense-form" class="mt-4 grid gap-4 sm:grid-cols-2">
+            <label class="block text-sm font-medium text-slate-700">Kategori Pengeluaran
+              <select name="kategori" required class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
+                <option value="Listrik & Air">Listrik &amp; Air</option>
+                <option value="Plastik & Kemasan">Plastik &amp; Kemasan</option>
+                <option value="Konsumsi & Kebersihan">Konsumsi &amp; Kebersihan</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </label>
+            ${inputField('Nominal (Rp)','nominal','number','','required min="1" step="1" inputmode="numeric"')}
+            ${inputField('Keterangan','keterangan','text','','required maxlength="160" placeholder="Contoh: Token listrik toko"')}
+            ${inputField('Tanggal','tanggal','date',dateValue,'readonly')}
+            ${inputField('Nama Kasir','kasir','text',activeUser?.nama||'Kasir','readonly')}
+            <div class="flex items-end">${primaryButton('Simpan Pengeluaran','type="submit" class="w-full"')}</div>
+          </form>
+        </section>
+        <section class="mb-4 rounded-2xl border border-rose-100 bg-rose-50 p-5">
+          <p class="text-sm font-medium text-rose-800">Total pengeluaran hari ini</p>
+          <p class="mt-1 text-2xl font-bold tracking-tight text-rose-700">${money(todayTotal)}</p>
+        </section>
+        ${table(['Tanggal & waktu','Kategori / keterangan','Nama Kasir','Nominal'],rows,'Belum ada pengeluaran yang dicatat.')}`;
+    }
     function renderFinanceReport() {
       const now=currentDate();
       const todayKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -543,10 +721,12 @@
       const timestampOf=item=>Number(item.timestamp)>0?Number(item.timestamp):new Date(item.tanggal).getTime();
       const allEvents=[
         ...store.transactions.map(item=>({timestamp:timestampOf(item),nomor:item.nomor,jenis:`Penjualan · ${item.metodePembayaran||'Tunai'}`,keterangan:(item.items||[]).map(detail=>`${detail.nama} × ${detail.qty}`).join(', '),pemasukan:Number(item.total)||0,pengeluaran:0})),
-        ...store.expenses.map(item=>({timestamp:timestampOf(item),nomor:item.nomor,jenis:item.jenis||'Penambahan stok',keterangan:`${item.pemasok?`${item.pemasok} · `:''}${(item.items||[]).map(detail=>`${detail.nama} × ${detail.qty}`).join(', ')}`,pemasukan:0,pengeluaran:Number(item.total)||0}))
+        ...store.expenses.map(item=>({timestamp:timestampOf(item),nomor:item.nomor,jenis:item.jenis||'Penambahan stok',keterangan:`${item.pemasok?`${item.pemasok} · `:''}${(item.items||[]).map(detail=>`${detail.nama} × ${detail.qty}`).join(', ')}`,pemasukan:0,pengeluaran:Number(item.total)||0})),
+        ...operatingExpenses.map(item=>({timestamp:timestampOf(item),nomor:item.nomor,jenis:`Biaya Operasional · ${item.kategori}`,keterangan:`${item.keterangan} · Kasir: ${item.kasir}`,pemasukan:0,pengeluaran:Number(item.nominal)||0}))
       ].filter(item=>Number.isFinite(item.timestamp)).sort((a,b)=>a.timestamp-b.timestamp);
       const income=allEvents.reduce((sum,item)=>sum+item.pemasukan,0);
       const expenses=allEvents.reduce((sum,item)=>sum+item.pengeluaran,0);
+      const operatingCostsTotal=operatingExpenses.reduce((sum,item)=>sum+Number(item.nominal||0),0);
       const net=income-expenses;
       let runningNet=0;
       const events=allEvents.map(item=>{
@@ -576,10 +756,11 @@
       const rugi=Math.max(0,-net);
       return `<div id="finance-report">
         ${sectionTitle('Laporan Keuangan','Ringkasan omzet penjualan dan pengeluaran pembelian stok.',primaryButton('Cetak Laporan','type="button" data-action="print-report"'))}
-        <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-5" aria-label="Ringkasan laporan keuangan">
+        <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6" aria-label="Ringkasan laporan keuangan">
           <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Modal Awal</p><p class="mt-3 text-2xl font-bold tracking-tight text-indigo-700">${money(store.initialCapital)}</p><form id="capital-form" class="mt-4 space-y-3"><label class="block text-xs font-medium text-slate-600">Atur modal awal<input name="initialCapital" type="number" min="0" step="1" required value="${store.initialCapital}" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"></label><button type="submit" class="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100">Simpan Modal</button></form></article>
           <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Pemasukan</p><p class="mt-3 text-2xl font-bold tracking-tight text-emerald-700">${money(income)}</p><p class="mt-1 text-xs text-slate-500">Omzet penjualan</p></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Pengeluaran</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(expenses)}</p><p class="mt-1 text-xs text-slate-500">Modal / pembelian stok</p></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Pengeluaran</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(expenses)}</p><p class="mt-1 text-xs text-slate-500">Stok dan biaya operasional</p></article>
+          <article class="rounded-2xl border border-orange-100 bg-orange-50 p-6 shadow-sm"><p class="text-sm font-medium text-orange-800">Biaya Operasional</p><p class="mt-3 text-2xl font-bold tracking-tight text-orange-700">${money(operatingCostsTotal)}</p><p class="mt-1 text-xs text-orange-700">Pengeluaran kasir tercatat</p></article>
           <article class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm"><p class="text-sm font-medium text-emerald-700">Total Laba</p><p class="mt-3 text-2xl font-bold tracking-tight text-emerald-700">${money(laba)}</p><p class="mt-1 text-xs text-emerald-700">Keuntungan bersih</p></article>
           <article class="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm"><p class="text-sm font-medium text-rose-700">Total Rugi</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(rugi)}</p><p class="mt-1 text-xs text-rose-700">Defisit bersih</p></article>
         </section>
@@ -589,22 +770,22 @@
         </section>
       </div>`;
     }
-    const PAGE_RENDERERS={dashboard:renderDashboard,cashier:renderCashier,categories:renderCategories,products:renderProducts,suppliers:renderSuppliers,purchases:renderPurchases,transactions:renderTransactions,finance:renderFinanceReport};
-    const PAGE_TITLES={dashboard:'Dashboard',cashier:'Halaman Kasir',categories:'Categories',products:'Products',suppliers:'Suppliers',purchases:'Purchases',transactions:'Transactions',finance:'Laporan Keuangan'};
+    const PAGE_RENDERERS={dashboard:renderDashboard,cashier:renderCashier,categories:renderCategories,products:renderProducts,suppliers:renderSuppliers,purchases:renderPurchases,transactions:renderTransactions,expenses:renderOperatingExpenses,finance:renderFinanceReport};
+    const PAGE_TITLES={dashboard:'Dashboard',cashier:'Halaman Kasir',categories:'Categories',products:'Products',suppliers:'Suppliers',purchases:'Purchases',transactions:'Transactions',expenses:'Pengeluaran',finance:'Laporan Keuangan'};
     function navigate(nextPage,query='') {
       const allowed=PAGE_RENDERERS[nextPage]&&canAccessPage(nextPage);
-      page=allowed?nextPage:'dashboard';
+      page=allowed?nextPage:isAdmin()?'dashboard':'cashier';
       const url=`/?page=${page}${query}`;
       history.pushState({page},'',url);
       closeSidebar();
       renderPage();
-      if(!allowed) showToast('Menu tersebut hanya dapat diakses Admin.',true);
+      if(!allowed) showToast('Kasir hanya dapat mengakses Dashboard, Halaman Kasir, Transactions, dan Pengeluaran.',true);
     }
     function renderPage() {
       if(!activeUser){authRender();return;}
       if(!PAGE_RENDERERS[page]||!canAccessPage(page)) {
-        page='dashboard';
-        history.replaceState({page},'','/?page=dashboard');
+        page=isAdmin()?'dashboard':'cashier';
+        history.replaceState({page},'',`/?page=${page}`);
       }
       document.getElementById('navigation').innerHTML=navHtml();
       document.getElementById('header-title').textContent=PAGE_TITLES[page];
@@ -725,6 +906,33 @@
     }
     function submitForm(form) {
       const data=Object.fromEntries(new FormData(form).entries());
+      if(form.id==='operating-expense-form') {
+        const categories=['Listrik & Air','Plastik & Kemasan','Konsumsi & Kebersihan','Lainnya'];
+        const kategori=String(data.kategori||'');
+        const keterangan=String(data.keterangan||'').trim();
+        const nominal=Number(data.nominal);
+        if(!categories.includes(kategori)) throw Error('Pilih kategori pengeluaran yang valid.');
+        if(!keterangan||keterangan.length>160) throw Error('Keterangan pengeluaran wajib diisi (maksimal 160 karakter).');
+        if(!Number.isSafeInteger(nominal)||nominal<1) throw Error('Nominal harus berupa angka bulat minimal Rp 1.');
+        const now=currentDate();
+        const expenseId=nextId(operatingExpenses);
+        const expense={
+          id:expenseId,
+          nomor:`OP-${localDateKey(now).replace(/-/g,'')}-${String(expenseId).padStart(3,'0')}`,
+          kategori,
+          keterangan,
+          nominal,
+          timestamp:now.getTime(),
+          tanggal:now.toISOString(),
+          kasir:String(activeUser?.nama||'Kasir')
+        };
+        operatingExpenses.push(expense);
+        if(!persistOperatingExpenses()) {
+          operatingExpenses=operatingExpenses.filter(item=>item.id!==expense.id);
+          throw Error('Pengeluaran dibatalkan karena gagal disimpan.');
+        }
+        renderPage();showToast('Pengeluaran berhasil disimpan.');return;
+      }
       if(form.id==='category-form') {
         const nama=String(data.nama||'').trim();
         if(!nama) throw Error('Nama kategori wajib diisi.');
@@ -858,11 +1066,12 @@
       }
     }
     function logout() {
-      activeUser=null;store.sessionUser=null;persist();cart=[];purchaseCart=[];window.cashierPayment='';paymentMethod='cash';authMode='login';authRender();
+      activeUser=null;store.sessionUser=null;persist();cart=[];purchaseCart=[];window.cashierPayment='';paymentMethod='cash';registerRole='Kasir';authRender();
     }
 
     document.getElementById('auth-form').addEventListener('submit',authSubmit);
-    document.getElementById('auth-switch').addEventListener('click',()=>{authMode=authMode==='login'?'register':'login';authRender();});
+    document.getElementById('auth-admin-tab').addEventListener('click',()=>{registerRole='Admin';authRender();});
+    document.getElementById('auth-cashier-tab').addEventListener('click',()=>{registerRole='Kasir';authRender();});
     document.getElementById('toggle-password').addEventListener('click',event=>{
       const input=document.getElementById('auth-password');
       const button=event.currentTarget;
@@ -905,8 +1114,8 @@
     });
     window.addEventListener('popstate',()=>{
       const next=new URLSearchParams(location.search).get('page')||'dashboard';
-      page=PAGE_RENDERERS[next]&&canAccessPage(next)?next:'dashboard';
-      if(page==='dashboard'&&next!=='dashboard') history.replaceState({page},'','/?page=dashboard');
+      page=PAGE_RENDERERS[next]&&canAccessPage(next)?next:isAdmin()?'dashboard':'cashier';
+      if(page!==next) history.replaceState({page},'',`/?page=${page}`);
       renderPage();
     });
     document.getElementById('print-receipt').addEventListener('click',()=>{
@@ -929,7 +1138,13 @@
     backfillPurchaseExpenses();
     const requestedPage=new URLSearchParams(location.search).get('page');
     if(PAGE_RENDERERS[requestedPage]&&canAccessPage(requestedPage)) page=requestedPage;
-    else if(requestedPage) history.replaceState({page},'','/?page=dashboard');
+    else if(requestedPage) {
+      page=isAdmin()?'dashboard':'cashier';
+      history.replaceState({page},'',`/?page=${page}`);
+    } else if(activeUser&&!isAdmin()) {
+      page='cashier';
+      history.replaceState({page},'','/?page=cashier');
+    }
     if(activeUser&&store.accounts.some(account=>account.id===activeUser.id)) showApp();
     else {activeUser=null;authRender();}
   })();
