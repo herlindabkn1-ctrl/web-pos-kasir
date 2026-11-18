@@ -135,7 +135,7 @@
           <label class="block text-sm font-semibold text-slate-700"><span id="auth-password-label">Kata sandi</span>
             <span class="relative mt-2 block">
               <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M8 10V7a4 4 0 1 1 8 0v3m-4 5v2"/></svg>
-              <input id="auth-password" name="password" type="password" required minlength="8" maxlength="128" autocomplete="current-password" class="auth-input pr-12">
+              <input id="auth-password" name="password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" class="auth-input pr-12">
               <button id="toggle-password" type="button" class="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 transition hover:text-sky-700" aria-label="Tampilkan kata sandi" aria-pressed="false">
                 <svg data-eye-icon class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
               </button>
@@ -221,7 +221,6 @@
       {key:'suppliers',title:'Suppliers',group:'Master data',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20M10 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 11a3.5 3.5 0 0 0 0-7M17 14h.5a4.5 4.5 0 0 1 4.5 4.5V20"/>'},
       {key:'purchases',title:'Purchases',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>'},
       {key:'transactions',title:'Transactions',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M8 13h8M8 17h8"/>'},
-      {key:'expenses',title:'Pengeluaran',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m5-14H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
       {key:'finance',title:'Laporan Keuangan',group:'Operasional',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8v-6m4 6V4"/>'}
     ];
     let store = loadStore();
@@ -234,6 +233,7 @@
     let categoryFilter = 'Semua';
     let searchQuery = '';
     let financePeriod = 'all';
+    let showOldTransactions = false;
     let receiptTransaction = null;
     let paymentMethod = 'cash';
     let toastTimer;
@@ -384,6 +384,7 @@
       return activeUser?.role==='Admin'&&String(activeUser.username||'').trim().toLowerCase()==='herlinda';
     }
     function canAccessPage(pageKey) {
+      if(pageKey==='finance') return isAdmin();
       return isAdmin()||['dashboard','cashier','transactions','expenses'].includes(pageKey);
     }
     function escapeHtml(value) {
@@ -431,7 +432,9 @@
       const usernameInput=document.querySelector('#auth-form [name="username"]');
       usernameInput.value=adminLogin?'herlinda':'';
       document.getElementById('auth-password-label').textContent=adminLogin?'Password':'Kata sandi';
-      document.querySelector('#auth-form [name="password"]').autocomplete=adminLogin?'current-password':'new-password';
+      const passwordInput=document.querySelector('#auth-form [name="password"]');
+      passwordInput.autocomplete=adminLogin?'current-password':'new-password';
+      if(!adminLogin) passwordInput.value='';
       document.getElementById('auth-submit').textContent=adminLogin?'Masuk':'Daftar & Masuk';
       const adminTab=document.getElementById('auth-admin-tab');
       const cashierTab=document.getElementById('auth-cashier-tab');
@@ -501,8 +504,10 @@
     }
     function navHtml() {
       return ['Menu utama','Master data','Operasional'].map(group=>{
-        const items=NAV_ITEMS.filter(item=>item.group===group&&(isAdmin()||['dashboard','cashier','transactions','expenses'].includes(item.key)));
-        return items.length?`<div><p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">${group}</p><div class="space-y-1">${items.map(item=>`<a href="/?page=${item.key}" data-page="${item.key}" ${page===item.key?'aria-current="page"':''} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${page===item.key?'bg-indigo-50 font-semibold text-indigo-700':'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${item.icon}</svg>${item.title}</a>`).join('')}</div></div>`:'';
+        const items=NAV_ITEMS.filter(item=>item.group===group&&(isAdmin()||['dashboard','cashier','transactions'].includes(item.key)));
+        if(!isAdmin()&&group==='Operasional') items.push({key:'expenses',title:'Pengeluaran',icon:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m5-14H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'});
+        const isCurrent=item=>page===item.key||(page==='expenses'&&item.key==='cashier'&&isAdmin());
+        return items.length?`<div><p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">${group}</p><div class="space-y-1">${items.map(item=>`<a href="/?page=${item.key}" data-page="${item.key}" ${isCurrent(item)?'aria-current="page"':''} class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${isCurrent(item)?'bg-indigo-50 font-semibold text-indigo-700':'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">${item.icon}</svg>${item.title}</a>`).join('')}</div></div>`:'';
       }).join('');
     }
     function sectionTitle(title,description,action='') {
@@ -617,7 +622,7 @@
             <div id="product-grid" class="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">${productCards||'<p class="col-span-full rounded-lg bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">Produk tidak ditemukan atau stok habis.</p>'}</div>
           </section>
           <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div class="flex items-center justify-between"><div><h2 class="font-semibold text-slate-900">Keranjang & Pembayaran</h2><p class="mt-1 text-xs text-slate-500">${cart.reduce((sum,item)=>sum+item.qty,0)} item</p></div><button type="button" data-action="clear-cart" class="text-xs font-semibold text-rose-600 hover:text-rose-800">Kosongkan</button></div>
+            <div class="flex items-center justify-between"><div><h2 class="font-semibold text-slate-900">Keranjang & Pembayaran</h2><p class="mt-1 text-xs text-slate-500">${cart.reduce((sum,item)=>sum+item.qty,0)} item</p></div></div>
             <div class="mt-3 divide-y divide-slate-100">${cart.length?cart.map(item=>itemCartRow(item,'sale')).join(''):'<p class="rounded-lg bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">Pilih produk untuk menambahkannya ke keranjang.</p>'}</div>
             <div class="mt-4 flex justify-between border-t border-slate-100 pt-4 text-base font-bold"><span>Total Belanja</span><span>${money(total)}</span></div>
             <form id="cashier-form" class="mt-4 space-y-4">
@@ -643,7 +648,7 @@
               <p class="text-xs text-slate-400">Stok langsung dikurangi dan nota disimpan setelah pembayaran berhasil.</p>
             </form>
           </section>
-        </div>`;
+        </div>${isAdmin()?renderOperatingExpenses():''}`;
     }
     function renderPurchases() {
       const total=purchaseCart.reduce((sum,item)=>sum+item.harga_beli*item.qty,0);
@@ -669,7 +674,11 @@
         </section><h2 class="mb-4 font-semibold text-slate-900">Riwayat pembelian</h2>${table(['Tanggal','ID Pembelian','Pemasok','Rincian produk','Total biaya'],purchaseRows,'Belum ada catatan pembelian.')}`;
     }
     function renderTransactions() {
-      const rows=store.transactions.slice().sort((a,b)=>b.timestamp-a.timestamp).map(transaction=>row([
+      const cutoff=Date.now()-30*24*60*60*1000;
+      const rows=store.transactions.slice().sort((a,b)=>b.timestamp-a.timestamp).filter(transaction=>{
+        const timestamp=Number(transaction.timestamp)>0?Number(transaction.timestamp):new Date(transaction.tanggal).getTime();
+        return showOldTransactions||!Number.isFinite(timestamp)||timestamp>=cutoff;
+      }).map(transaction=>row([
         escapeHtml(dateTime(transaction.timestamp)),
         `<button type="button" data-action="show-receipt" data-id="${transaction.id}" class="font-semibold text-indigo-700 hover:text-indigo-900">${escapeHtml(transaction.nomor)}</button>`,
         escapeHtml(transaction.kasir||'Kasir'),
@@ -677,7 +686,8 @@
         escapeHtml(transaction.metodePembayaran||'Tunai'),
         `<span class="font-semibold text-slate-900">${money(transaction.total)}</span>`
       ])).join('');
-      return `${sectionTitle('Transactions','Riwayat nota lengkap. Klik nomor nota untuk melihat dan mencetak struk.')}${table(['Tanggal & waktu','ID Transaksi','Nama Kasir','Rincian item','Metode Pembayaran','Total belanja'],rows,'Belum ada transaksi penjualan.')}`;
+      const toggleLabel=showOldTransactions?'Sembunyikan Transaksi Lama':'Tampilkan Transaksi Lama (> 30 Hari)';
+      return `${sectionTitle('Transactions','Riwayat nota lengkap. Klik nomor nota untuk melihat dan mencetak struk.',primaryButton(toggleLabel,'type="button" data-action="toggle-old-transactions"'))}${table(['Tanggal & waktu','ID Transaksi','Nama Kasir','Rincian item','Metode Pembayaran','Total belanja'],rows,'Belum ada transaksi penjualan.')}`;
     }
     function renderOperatingExpenses() {
       const today=localDateKey(currentDate());
@@ -691,20 +701,19 @@
       const dateValue=today;
       return `${sectionTitle('Pengeluaran','Catat biaya operasional harian toko.')}
         <section class="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 class="font-semibold text-slate-900">Catat pengeluaran baru</h2>
+          <h2 class="font-semibold text-slate-900">Catat Pengeluaran Baru</h2>
           <form id="operating-expense-form" class="mt-4 grid gap-4 sm:grid-cols-2">
             <label class="block text-sm font-medium text-slate-700">Kategori Pengeluaran
               <select name="kategori" required class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
-                <option value="Listrik & Air">Listrik &amp; Air</option>
-                <option value="Plastik & Kemasan">Plastik &amp; Kemasan</option>
-                <option value="Konsumsi & Kebersihan">Konsumsi &amp; Kebersihan</option>
-                <option value="Lainnya">Lainnya</option>
+                <option value="Listrik">Listrik</option>
+                <option value="Air">Air</option>
+                <option value="Operasional Lainnya">Operasional Lainnya</option>
               </select>
             </label>
             ${inputField('Nominal (Rp)','nominal','number','','required min="1" step="1" inputmode="numeric"')}
             ${inputField('Keterangan','keterangan','text','','required maxlength="160" placeholder="Contoh: Token listrik toko"')}
-            ${inputField('Tanggal','tanggal','date',dateValue,'readonly')}
-            ${inputField('Nama Kasir','kasir','text',activeUser?.nama||'Kasir','readonly')}
+            ${inputField('Tanggal','tanggal','date',dateValue,'required')}
+            ${inputField('Nama Kasir','kasir','text',activeUser?.nama||'Kasir','required maxlength="100"')}
             <div class="flex items-end">${primaryButton('Simpan Pengeluaran','type="submit" class="w-full"')}</div>
           </form>
         </section>
@@ -726,7 +735,14 @@
       ].filter(item=>Number.isFinite(item.timestamp)).sort((a,b)=>a.timestamp-b.timestamp);
       const income=allEvents.reduce((sum,item)=>sum+item.pemasukan,0);
       const expenses=allEvents.reduce((sum,item)=>sum+item.pengeluaran,0);
-      const operatingCostsTotal=operatingExpenses.reduce((sum,item)=>sum+Number(item.nominal||0),0);
+      const monthlyIncome=store.transactions.reduce((sum,item)=>{
+        const timestamp=timestampOf(item);
+        if(!Number.isFinite(timestamp)) return sum;
+        const date=new Date(timestamp);
+        return date.getFullYear()===now.getFullYear()&&date.getMonth()===now.getMonth()
+          ?sum+(Number(item.total)||0)
+          :sum;
+      },0);
       const net=income-expenses;
       let runningNet=0;
       const events=allEvents.map(item=>{
@@ -755,23 +771,21 @@
       const laba=Math.max(0,net);
       const rugi=Math.max(0,-net);
       return `<div id="finance-report">
-        ${sectionTitle('Laporan Keuangan','Ringkasan omzet penjualan dan pengeluaran pembelian stok.',primaryButton('Cetak Laporan','type="button" data-action="print-report"'))}
-        <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6" aria-label="Ringkasan laporan keuangan">
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Modal Awal</p><p class="mt-3 text-2xl font-bold tracking-tight text-indigo-700">${money(store.initialCapital)}</p><form id="capital-form" class="mt-4 space-y-3"><label class="block text-xs font-medium text-slate-600">Atur modal awal<input name="initialCapital" type="number" min="0" step="1" required value="${store.initialCapital}" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"></label><button type="submit" class="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100">Simpan Modal</button></form></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Pemasukan</p><p class="mt-3 text-2xl font-bold tracking-tight text-emerald-700">${money(income)}</p><p class="mt-1 text-xs text-slate-500">Omzet penjualan</p></article>
-          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Total Pengeluaran</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(expenses)}</p><p class="mt-1 text-xs text-slate-500">Stok dan biaya operasional</p></article>
-          <article class="rounded-2xl border border-orange-100 bg-orange-50 p-6 shadow-sm"><p class="text-sm font-medium text-orange-800">Biaya Operasional</p><p class="mt-3 text-2xl font-bold tracking-tight text-orange-700">${money(operatingCostsTotal)}</p><p class="mt-1 text-xs text-orange-700">Pengeluaran kasir tercatat</p></article>
-          <article class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm"><p class="text-sm font-medium text-emerald-700">Total Laba</p><p class="mt-3 text-2xl font-bold tracking-tight text-emerald-700">${money(laba)}</p><p class="mt-1 text-xs text-emerald-700">Keuntungan bersih</p></article>
-          <article class="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm"><p class="text-sm font-medium text-rose-700">Total Rugi</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(rugi)}</p><p class="mt-1 text-xs text-rose-700">Defisit bersih</p></article>
+        ${sectionTitle('Laporan Keuangan','Ringkasan omzet bulan ini, laba rugi, dan arus kas toko.',primaryButton('Cetak Laporan','type="button" data-action="print-report"'))}
+        <section class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan laporan keuangan">
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Modal Awal</p><p class="mt-3 text-2xl font-bold tracking-tight text-indigo-700">${money(store.initialCapital)}</p><p class="mt-1 text-xs text-slate-500">Modal awal usaha yang ditetapkan</p><form id="capital-form" class="mt-4 space-y-3"><label class="block text-xs font-medium text-slate-600">Atur modal awal<input name="initialCapital" type="number" min="0" step="1" required value="${store.initialCapital}" class="mt-1.5 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"></label><button type="submit" class="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100">Simpan Modal</button></form></article>
+          <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm font-medium text-slate-500">Omzet Bulan Ini</p><p class="mt-3 text-2xl font-bold tracking-tight text-emerald-700">${money(monthlyIncome)}</p><p class="mt-1 text-xs text-slate-500">Akumulasi seluruh transaksi penjualan pada bulan berjalan</p></article>
+          <article class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm"><p class="text-sm font-medium text-emerald-700">Laba</p><p class="mt-3 text-2xl font-bold tracking-tight text-emerald-700">${money(laba)}</p><p class="mt-1 text-xs text-emerald-700">Keuntungan bersih: pemasukan dikurangi pembelian stok dan biaya operasional</p></article>
+          <article class="rounded-2xl border border-rose-200 bg-rose-50 p-6 shadow-sm"><p class="text-sm font-medium text-rose-700">Rugi</p><p class="mt-3 text-2xl font-bold tracking-tight text-rose-700">${money(rugi)}</p><p class="mt-1 text-xs text-rose-700">Defisit bersih ketika seluruh pengeluaran melebihi pemasukan</p></article>
         </section>
         <section class="mt-8">
-          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><h2 class="font-semibold text-slate-900">Rincian Arus Kas</h2><p class="mt-1 text-xs text-slate-500">Data transaksi penjualan dan pembelian stok</p></div><label class="block text-sm font-medium text-slate-700">Periode<select id="finance-period" class="mt-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"><option value="all" ${financePeriod==='all'?'selected':''}>Semua</option><option value="today" ${financePeriod==='today'?'selected':''}>Hari Ini</option><option value="month" ${financePeriod==='month'?'selected':''}>Bulan Ini</option></select></label></div>
+          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><h2 class="font-semibold text-slate-900">Rincian Arus Kas</h2><p class="mt-1 text-xs text-slate-500">Data penjualan, pembelian stok, dan biaya operasional</p></div><label class="block text-sm font-medium text-slate-700">Periode<select id="finance-period" class="mt-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"><option value="all" ${financePeriod==='all'?'selected':''}>Semua</option><option value="today" ${financePeriod==='today'?'selected':''}>Hari Ini</option><option value="month" ${financePeriod==='month'?'selected':''}>Bulan Ini</option></select></label></div>
           ${table(['Tanggal & waktu','No. Referensi','Jenis / keterangan','Modal Awal (Rp)','Pemasukan (Rp)','Pengeluaran (Rp)','Laba (Rp)','Rugi (Rp)'],`${events}${openingCapitalRow}`,'Belum ada arus kas pada periode ini.')}
         </section>
       </div>`;
     }
-    const PAGE_RENDERERS={dashboard:renderDashboard,cashier:renderCashier,categories:renderCategories,products:renderProducts,suppliers:renderSuppliers,purchases:renderPurchases,transactions:renderTransactions,expenses:renderOperatingExpenses,finance:renderFinanceReport};
-    const PAGE_TITLES={dashboard:'Dashboard',cashier:'Halaman Kasir',categories:'Categories',products:'Products',suppliers:'Suppliers',purchases:'Purchases',transactions:'Transactions',expenses:'Pengeluaran',finance:'Laporan Keuangan'};
+    const PAGE_RENDERERS={dashboard:renderDashboard,cashier:renderCashier,categories:renderCategories,products:renderProducts,suppliers:renderSuppliers,purchases:renderPurchases,transactions:renderTransactions,expenses:()=>isAdmin()?renderCashier():renderOperatingExpenses(),finance:renderFinanceReport};
+    const PAGE_TITLES={dashboard:'Dashboard',cashier:'Halaman Kasir',categories:'Categories',products:'Products',suppliers:'Suppliers',purchases:'Purchases',transactions:'Transactions',expenses:'Halaman Kasir',finance:'Laporan Keuangan'};
     function navigate(nextPage,query='') {
       const allowed=PAGE_RENDERERS[nextPage]&&canAccessPage(nextPage);
       page=allowed?nextPage:isAdmin()?'dashboard':'cashier';
@@ -779,7 +793,7 @@
       history.pushState({page},'',url);
       closeSidebar();
       renderPage();
-      if(!allowed) showToast('Kasir hanya dapat mengakses Dashboard, Halaman Kasir, Transactions, dan Pengeluaran.',true);
+      if(!allowed) showToast('Kasir hanya dapat mengakses Dashboard, Halaman Kasir, dan Transactions.',true);
     }
     function renderPage() {
       if(!activeUser){authRender();return;}
@@ -788,10 +802,10 @@
         history.replaceState({page},'',`/?page=${page}`);
       }
       document.getElementById('navigation').innerHTML=navHtml();
-      document.getElementById('header-title').textContent=PAGE_TITLES[page];
-      document.title=`${PAGE_TITLES[page]} | Sembako Jaya`;
+      document.getElementById('header-title').textContent=page==='expenses'&&!isAdmin()?'Pengeluaran':PAGE_TITLES[page];
+      document.title=`${page==='expenses'&&!isAdmin()?'Pengeluaran':PAGE_TITLES[page]} | Sembako Jaya`;
       document.getElementById('page-content').innerHTML=PAGE_RENDERERS[page]();
-      if(page==='cashier') {
+      if(page==='cashier'||page==='expenses') {
         const field=document.querySelector('#cashier-form [name="tunai"]');
         if(field&&window.cashierPayment) field.value=window.cashierPayment;
         updateChange();
@@ -907,24 +921,28 @@
     function submitForm(form) {
       const data=Object.fromEntries(new FormData(form).entries());
       if(form.id==='operating-expense-form') {
-        const categories=['Listrik & Air','Plastik & Kemasan','Konsumsi & Kebersihan','Lainnya'];
+        const categories=['Listrik','Air','Operasional Lainnya'];
         const kategori=String(data.kategori||'');
         const keterangan=String(data.keterangan||'').trim();
         const nominal=Number(data.nominal);
+        const tanggal=String(data.tanggal||'');
+        const kasir=String(data.kasir||'').trim();
         if(!categories.includes(kategori)) throw Error('Pilih kategori pengeluaran yang valid.');
         if(!keterangan||keterangan.length>160) throw Error('Keterangan pengeluaran wajib diisi (maksimal 160 karakter).');
         if(!Number.isSafeInteger(nominal)||nominal<1) throw Error('Nominal harus berupa angka bulat minimal Rp 1.');
-        const now=currentDate();
+        const expenseDate=new Date(`${tanggal}T12:00:00`);
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)||localDateKey(expenseDate)!==tanggal) throw Error('Pilih tanggal pengeluaran yang valid.');
+        if(!kasir||kasir.length>100) throw Error('Nama kasir wajib diisi (maksimal 100 karakter).');
         const expenseId=nextId(operatingExpenses);
         const expense={
           id:expenseId,
-          nomor:`OP-${localDateKey(now).replace(/-/g,'')}-${String(expenseId).padStart(3,'0')}`,
+          nomor:`OP-${tanggal.replace(/-/g,'')}-${String(expenseId).padStart(3,'0')}`,
           kategori,
           keterangan,
           nominal,
-          timestamp:now.getTime(),
-          tanggal:now.toISOString(),
-          kasir:String(activeUser?.nama||'Kasir')
+          timestamp:expenseDate.getTime(),
+          tanggal:expenseDate.toISOString(),
+          kasir
         };
         operatingExpenses.push(expense);
         if(!persistOperatingExpenses()) {
@@ -1023,6 +1041,7 @@
     function handleAction(element) {
       const action=element.dataset.action;
       const id=Number(element.dataset.id);
+      if(action==='toggle-old-transactions') {showOldTransactions=!showOldTransactions;renderPage();return;}
       if(action==='filter-category') {categoryFilter=element.dataset.category;renderPage();return;}
       if(action==='select-payment') {
         paymentMethod=element.dataset.method==='qris'?'qris':'cash';
